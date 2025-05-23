@@ -15,7 +15,7 @@ The main goals of this project are:
 Key Technologies
 ----------------
 
-*   **c/C++**: The main programming language, serving as the backbone of the engine. C++ is used for the core physics simulation logic and management.
+*   **C/C++**: The main programming language, serving as the backbone of the engine. C++ is used for the core physics simulation logic and management.
 *   **CUDA**: Used for offloading heavy computational tasks, such as matrix operations, collision detection, and force calculations, to the GPU. CUDA accelerates large-scale parallel processing for high-performance simulations.
 *   **Fortran**: Used for performance-critical, small-scale numerical calculations that don’t require GPU parallelization. This allows for fast array manipulations and tight-loop optimizations.
 
@@ -70,7 +70,7 @@ Wiki
 
 The Wiki will include:
 
-The [**Wiki**](https://github.com/StevenKight/Physics-Engine.git/wiki) contains detailed notes and derivations for the mathematical models used in the engine. Here, you will find:
+The [**Wiki**](https://github.com/StevenKight/Physics-Engine/wiki) contains detailed notes and derivations for the mathematical models used in the engine. Here, you will find:
 
 *   Full derivations of the equations for forces, motion, and collisions.
 *   Descriptions of how these equations are converted into matrix operations for GPU computation.
@@ -85,6 +85,19 @@ This engine is optimized for high-performance computing. The majority of computa
 
 *   The use of CuBLAS for matrix operations can be enabled for even faster computations on compatible NVIDIA GPUs.
 *   Keep an eye on the GPU usage with tools like `nvidia-smi` to monitor and optimize resource consumption during simulations.
+
+Future Work
+-----------
+
+This engine is under active development. Future goals include:
+
+* Integration with rendering pipelines (custom or via Blender/Unity plugins).
+* Development of a plugin or shared library interface for use in other applications.
+* Implementation of advanced constraint systems and soft-body dynamics.
+* Support for mixed-precision arithmetic to optimize GPU throughput.
+* Further optimization of Fortran routines for CPU-bound tasks.
+* Comprehensive testing and benchmarking against existing physics engines.
+* Documentation of the engine's architecture and design patterns.
 
 License
 -------
