@@ -1,6 +1,6 @@
 # Add your Fortran source files
 set(FORTRAN_SOURCES
-    fortran_utils.h utils.f90
+    array.h array.f90
 )
 
 # Create a library from Fortran sources

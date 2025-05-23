@@ -13,5 +13,5 @@ set(CMAKE_Fortran_STANDARD 2003)
 
 # Add subdirectories where your code is located
 add_subdirectory(src)
-add_subdirectory(src/fortran)
+add_subdirectory(src/array)
 add_subdirectory(src/matrix)
