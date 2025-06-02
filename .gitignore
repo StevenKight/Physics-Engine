@@ -5,3 +5,6 @@ out/
 
 # Ignore VS Code settings
 .vscode/
+
+# Ignore Obsidian settings
+.obsidian/
