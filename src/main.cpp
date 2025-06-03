@@ -5,6 +5,7 @@
 
 #include <parser.h>
 #include <matrix.h>
+#include <dummy.h>
 
 // Helper function to test and run a function
 void test_and_run_function(
@@ -29,21 +30,18 @@ void test_cuda_functions(const Matrix* a, const Matrix* b, Matrix* result) {
         matrix_multiply,
         a, b, result
     );
-    printf("\n");
 
     test_and_run_function(
         "Matrix Addition",
         matrix_add,
         a, b, result
     );
-    printf("\n");
 
     test_and_run_function(
         "Matrix Subtraction",
         matrix_subtract,
         a, b, result
     );
-    printf("\n");
 }
 
 int main() {
@@ -53,20 +51,24 @@ int main() {
     Matrix b;
     Matrix result;
 
-    initialize_matrix(&a, 50000, 50000);
-    initialize_matrix(&b, 50000, 50000);
+    initialize_matrix(&a, 25000, 25000);
+    initialize_matrix(&b, 25000, 25000);
     fill_matrix(&a, 1.0f);
     fill_matrix(&b, 2.0f);
 
     // Test and run matrix operations
     printf("Testing CUDA functions:\n");
     test_cuda_functions(&a, &b, &result);
-    printf("\n");
 
     // Free allocated memory
     free_matrix(&a);
     free_matrix(&b);
-    printf("All CUDA tests completed successfully.\n");
+    printf("\n");
+
+    // Test Fortran integration
+    printf("Testing Fortran integration:\n");
+    say_hello();
+    printf("\n");
 
     // Test file parsing
     printf("Testing file parsing:\n");

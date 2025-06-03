@@ -1,22 +1,28 @@
-# Set the minimum CMake version required
 cmake_minimum_required(VERSION 3.15)
 
-# Set CUDA specific flags if necessary
-set(CMAKE_CUDA_ARCHITECTURES "native")
-
-# Set the project name and languages
 project(Physics_Engine LANGUAGES C CXX Fortran CUDA)
 
-# Set the C++ standard, Fortran standard, or other language-specific flags
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_Fortran_STANDARD 2003)
+# Language standards
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Add subdirectories where code is located
+set(CMAKE_Fortran_STANDARD 2003)
+set(CMAKE_Fortran_STANDARD_REQUIRED ON)
+
+set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_ARCHITECTURES "native")
+
+# Define subdirectories (modular libraries and main build target)
 set(SUBDIRECTORIES
-    src src/array src/matrix src/io src/state
+    src            # Main application and entry point
+    src/fortran      # Fortran sublibrary (tight loop utilities)
+    src/matrix     # CUDA sublibrary (matrix ops, GPU accel)
+    src/io         # I/O parsing and serialization
+    src/state      # Data models for simulation objects
 )
 
-# Include the subdirectories
-foreach(subdir ${SUBDIRECTORIES})
-    add_subdirectory(${subdir})
+# Include each subdirectory
+foreach(SUBDIR ${SUBDIRECTORIES})
+    add_subdirectory(${SUBDIR})
 endforeach()

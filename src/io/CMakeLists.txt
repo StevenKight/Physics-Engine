@@ -1,15 +1,12 @@
-# Add your Fortran source files
-set(IO_SOURCES
-  parser.h parser.cpp
+# I/O library for reading simulation files
+add_library(io_lib
+    parser.cpp
 )
 
-# Create a library from Fortran sources
-add_library(io_lib ${IO_SOURCES})
-
-# Include directories for the library
+# Expose headers in this directory to consumers
 target_include_directories(io_lib PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}  # Adds the current directory (which should contain utils.h) to the include path
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-# Include libraries if needed
+# Link the core simulation state library
 target_link_libraries(io_lib PUBLIC state_lib)
