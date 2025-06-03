@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <vector>
 #include <chrono>
+#include <iostream>
 
+#include <parser.h>
 #include <matrix.h>
 
 // Helper function to test and run a function
@@ -20,6 +22,7 @@ void test_and_run_function(
     printf("%s time: %f seconds\n", function_name, duration.count());
 }
 
+// Helper function to test CUDA functions
 void test_cuda_functions(const Matrix* a, const Matrix* b, Matrix* result) {
     test_and_run_function(
         "Matrix Multiplication", 
@@ -63,11 +66,19 @@ int main() {
     // Free allocated memory
     free_matrix(&a);
     free_matrix(&b);
+    printf("All CUDA tests completed successfully.\n");
 
-    // Setup test values
-    float a_val = 1000000000.0f;
-    float b_val = 2000000000.0f;
-    float result_val = 0.0f;
+    // Test file parsing
+    printf("Testing file parsing:\n");
+    auto objects = io::parse_phys_file("/home/steven-kight/Documents/Physics/Physics-Engine/data/test.phys");
+
+    for (const auto& obj : objects) {
+        std::cout << "Object:\n"
+                  << "  Center: " << obj.center.x << ", " << obj.center.y << ", " << obj.center.z << "\n"
+                  << "  Scale: "  << obj.scale.x << ", " << obj.scale.y << ", " << obj.scale.z << "\n"
+                  << "  Mass: "   << obj.mass << "\n"
+                  << "  Velocity: " << obj.velocity.x << ", " << obj.velocity.y << ", " << obj.velocity.z << "\n";
+    }
 
     return 0;
 }

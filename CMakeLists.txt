@@ -11,7 +11,12 @@ project(Physics_Engine LANGUAGES C CXX Fortran CUDA)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_Fortran_STANDARD 2003)
 
-# Add subdirectories where your code is located
-add_subdirectory(src)
-add_subdirectory(src/array)
-add_subdirectory(src/matrix)
+# Add subdirectories where code is located
+set(SUBDIRECTORIES
+    src src/array src/matrix src/io src/state
+)
+
+# Include the subdirectories
+foreach(subdir ${SUBDIRECTORIES})
+    add_subdirectory(${subdir})
+endforeach()

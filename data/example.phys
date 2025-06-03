@@ -1,0 +1,14 @@
+# This file defines a simple physics simulation object with properties like position, scale, mass, and initial velocity.
+# Format: simobj v1.0
+
+# Simple object
+c 0.0 0.0 0.0     # center coordinates (x, y, z) in meters
+s 1.0 1.0 1.0     # scale (size or bounding box)
+m 1.0             # mass (kg)
+iv 0.0 0.0 0.0    # initial velocity (vector) in m/s
+
+# Another object
+c 2.0 2.0 0.0
+s 0.5 0.5 0.5
+m 2.0
+iv -1.0 0.0 0.0

@@ -21,10 +21,13 @@ target_include_directories(Physics PRIVATE ${CUDA_INCLUDE_DIRS})
 target_compile_definitions(Physics PRIVATE -DUSE_CUDA)
 
 # Link libraries if needed (e.g., CUDA libraries)
-target_link_libraries(Physics PRIVATE fortran_library matrix_library)
+set(LOCAL_LIBS fortran_library matrix_library io_lib state_lib)
+target_link_libraries(Physics PRIVATE ${LOCAL_LIBS})
 
 # Include directories for the main program
 target_include_directories(Physics PRIVATE
-  ${CMAKE_SOURCE_DIR}/matrix  # Add path to matrix_library, where utils.h is defined
-  ${CMAKE_SOURCE_DIR}/fortran  # Add path to fortran_library, where utils.h may also reside
+  ${CMAKE_SOURCE_DIR}/matrix  # Add path to cuda library
+  ${CMAKE_SOURCE_DIR}/array  # Add path to fortran library
+  ${CMAKE_SOURCE_DIR}/io      # Add path to io_lib, where file io functions are defined
+  ${CMAKE_SOURCE_DIR}/state   # Add path to state_lib, where objects are defined
 )
