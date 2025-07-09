@@ -79,7 +79,8 @@ int main() {
                   << "  Center: " << obj.center.x << ", " << obj.center.y << ", " << obj.center.z << "\n"
                   << "  Scale: "  << obj.scale.x << ", " << obj.scale.y << ", " << obj.scale.z << "\n"
                   << "  Mass: "   << obj.mass << "\n"
-                  << "  Velocity: " << obj.velocity.x << ", " << obj.velocity.y << ", " << obj.velocity.z << "\n";
+                  << "  Velocity: " << obj.velocity.x << ", " << obj.velocity.y << ", " << obj.velocity.z << "\n"
+                  << "  Acceleration: " << obj.acceleration.x << ", " << obj.acceleration.y << ", " << obj.acceleration.z << "\n";
     }
 
     return 0;

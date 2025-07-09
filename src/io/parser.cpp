@@ -43,6 +43,8 @@ std::vector<Object> io::parse_phys_file(const std::string& filename) {
         } else if (directive == "iv") {
             iss >> current.velocity.x >> current.velocity.y >> current.velocity.z;
             has_velocity = true;
+        } else if (directive == "av") {
+            iss >> current.acceleration.x >> current.acceleration.y >> current.acceleration.z;
         }
 
         if (has_center && has_scale && has_mass && has_velocity) {
