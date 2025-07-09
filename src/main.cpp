@@ -1,47 +1,35 @@
-#include <stdio.h>
-#include <vector>
 #include <chrono>
 #include <iostream>
+#include <stdio.h>
+#include <vector>
 
-#include <parser.h>
-#include <matrix.h>
 #include <dummy.h>
+#include <matrix.h>
+#include <parser.h>
 
 // Helper function to test and run a function
-void test_and_run_function(
-    char* function_name,
-    void (*function)(const Matrix* a, const Matrix* b, Matrix* result),
-    const Matrix* a, const Matrix* b, Matrix* result
-) {
+void test_and_run_function(char *function_name,
+                           void (*function)(const Matrix *a, const Matrix *b,
+                                            Matrix *result),
+                           const Matrix *a, const Matrix *b, Matrix *result) {
     // Function Execution
     auto start = std::chrono::high_resolution_clock::now();
     function(a, b, result);
     auto end = std::chrono::high_resolution_clock::now();
-    
+
     // Logging
     std::chrono::duration<float> duration = end - start;
     printf("%s time: %f seconds\n", function_name, duration.count());
 }
 
 // Helper function to test CUDA functions
-void test_cuda_functions(const Matrix* a, const Matrix* b, Matrix* result) {
-    test_and_run_function(
-        "Matrix Multiplication", 
-        matrix_multiply,
-        a, b, result
-    );
+void test_cuda_functions(const Matrix *a, const Matrix *b, Matrix *result) {
+    test_and_run_function("Matrix Multiplication", matrix_multiply, a, b,
+                          result);
 
-    test_and_run_function(
-        "Matrix Addition",
-        matrix_add,
-        a, b, result
-    );
+    test_and_run_function("Matrix Addition", matrix_add, a, b, result);
 
-    test_and_run_function(
-        "Matrix Subtraction",
-        matrix_subtract,
-        a, b, result
-    );
+    test_and_run_function("Matrix Subtraction", matrix_subtract, a, b, result);
 }
 
 int main() {
@@ -72,15 +60,20 @@ int main() {
 
     // Test file parsing
     printf("Testing file parsing:\n");
-    auto objects = io::parse_phys_file("/home/steven-kight/Documents/Physics/Physics-Engine/data/test.phys");
+    auto objects = io::parse_phys_file(
+        "/home/steven-kight/Documents/Physics/Physics-Engine/data/test.phys");
 
-    for (const auto& obj : objects) {
+    for (const auto &obj : objects) {
         std::cout << "Object:\n"
-                  << "  Center: " << obj.center.x << ", " << obj.center.y << ", " << obj.center.z << "\n"
-                  << "  Scale: "  << obj.scale.x << ", " << obj.scale.y << ", " << obj.scale.z << "\n"
-                  << "  Mass: "   << obj.mass << "\n"
-                  << "  Velocity: " << obj.velocity.x << ", " << obj.velocity.y << ", " << obj.velocity.z << "\n"
-                  << "  Acceleration: " << obj.acceleration.x << ", " << obj.acceleration.y << ", " << obj.acceleration.z << "\n";
+                  << "  Center: " << obj.center.x << ", " << obj.center.y
+                  << ", " << obj.center.z << "\n"
+                  << "  Scale: " << obj.scale.x << ", " << obj.scale.y << ", "
+                  << obj.scale.z << "\n"
+                  << "  Mass: " << obj.mass << "\n"
+                  << "  Velocity: " << obj.velocity.x << ", " << obj.velocity.y
+                  << ", " << obj.velocity.z << "\n"
+                  << "  Acceleration: " << obj.acceleration.x << ", "
+                  << obj.acceleration.y << ", " << obj.acceleration.z << "\n";
     }
 
     return 0;

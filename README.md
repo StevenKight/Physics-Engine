@@ -102,7 +102,11 @@ This engine is under active development. Future goals include:
 License
 -------
 
-This project is currently licensed under the **\[TBD License\]**. Please check back later for more details on licensing and contributions.
+This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
+
+You are free to use, modify, and distribute this software under the terms of the GPL v3. This means that any derivative works or redistributions must also be licensed under the GPL v3, ensuring the same freedoms to all users.
+
+The full license text can be found in the [LICENSE](./LICENSE) file.
 
 Contributions
 -------------
