@@ -1,7 +1,12 @@
 {
   "recommendations": [
-    "llvm-vs-code-extensions.vscode-clangd",       // Clangd (C/C++ language server)
-    "ms-vscode.cmake-tools",                       // CMake tools
+    "llvm-vs-code-extensions.vscode-clangd",
+    "ms-vscode.cmake-tools",
+    "donjayamanne.githistory",
+    "nvidia.cuda-toolkit",
+    "fortran-lang.vscode-fortran-modern",
+    "streetsidesoftware.code-spell-checker",
+    "cschlosser.doxdocgen"
   ],
   "unwantedRecommendations": []
 }
