@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 using namespace state;
 
@@ -13,54 +15,68 @@ std::vector<Object> io::parse_phys_file(const std::string &filename) {
     }
 
     std::vector<Object> objects;
-    Object current;
-
-    bool has_center = false;
-    bool has_scale = false;
-    bool has_mass = false;
-    bool has_velocity = false;
-    bool has_acceleration = false;
+    Object current_object;
+    bool object_in_progress = false;
 
     std::string line;
     while (std::getline(file, line)) {
-        // Remove comments and skip empty lines
+        // Remove comments and trim whitespace
         auto comment_pos = line.find('#');
-        if (comment_pos != std::string::npos)
+        if (comment_pos != std::string::npos) {
             line = line.substr(0, comment_pos);
-        if (line.empty())
+        }
+        line.erase(0, line.find_first_not_of(" \t\n\r"));
+        line.erase(line.find_last_not_of(" \t\n\r") + 1);
+
+        if (line.empty()) {
             continue;
+        }
 
         std::istringstream iss(line);
         std::string directive;
         iss >> directive;
 
-        // TODO: Change to enum for directives and refactor and change to
-        // switch-case
-        if (directive == "c") {
-            iss >> current.center.x >> current.center.y >> current.center.z;
-            has_center = true;
+        if (directive == "c" || directive == "pos") {
+            // 'c' or 'pos' directive starts a new object.
+            // If one was already being parsed, save it before starting anew.
+            if (object_in_progress) {
+                objects.push_back(current_object);
+            }
+            // Reset to a default object for the new entry
+            current_object = Object{};
+            iss >> current_object.position.x >> current_object.position.y >>
+                current_object.position.z;
+            object_in_progress = true;
         } else if (directive == "s") {
-            iss >> current.scale.x >> current.scale.y >> current.scale.z;
-            has_scale = true;
+            iss >> current_object.scale.x >> current_object.scale.y >>
+                current_object.scale.z;
         } else if (directive == "m") {
-            iss >> current.mass;
-            has_mass = true;
+            iss >> current_object.mass;
         } else if (directive == "iv") {
-            iss >> current.velocity.x >> current.velocity.y >>
-                current.velocity.z;
-            has_velocity = true;
-        } else if (directive == "av") {
-            iss >> current.acceleration.x >> current.acceleration.y >>
-                current.acceleration.z;
+            iss >> current_object.velocity.x >> current_object.velocity.y >>
+                current_object.velocity.z;
+        } else if (directive == "rot") {
+            iss >> current_object.orientation.w >>
+                current_object.orientation.x >> current_object.orientation.y >>
+                current_object.orientation.z;
+        } else if (directive == "iav" || directive == "av") {
+            iss >> current_object.angular_velocity.x >>
+                current_object.angular_velocity.y >>
+                current_object.angular_velocity.z;
+        } else if (directive == "com") {
+            iss >> current_object.center_of_mass.x >>
+                current_object.center_of_mass.y >>
+                current_object.center_of_mass.z;
+        } else if (directive == "restitution") {
+            iss >> current_object.restitution;
+        } else if (directive == "friction") {
+            iss >> current_object.friction;
         }
+    }
 
-        if (has_center && has_scale && has_mass && has_velocity &&
-            has_acceleration) {
-            objects.push_back(current);
-            current = Object{}; // Reset
-            has_center = has_scale = has_mass = has_velocity =
-                has_acceleration = false;
-        }
+    // Add the last object to the list if it exists
+    if (object_in_progress) {
+        objects.push_back(current_object);
     }
 
     return objects;

@@ -5,3 +5,6 @@ out/
 
 # Ignore Obsidian settings
 .obsidian/
+
+# Ignore cache files
+.cache/

@@ -65,8 +65,8 @@ int main() {
 
     for (const auto &obj : objects) {
         std::cout << "Object:\n"
-                  << "  Center: " << obj.center.x << ", " << obj.center.y
-                  << ", " << obj.center.z << "\n"
+                  << "  Position: " << obj.position.x << ", " << obj.position.y
+                  << ", " << obj.position.z << "\n"
                   << "  Scale: " << obj.scale.x << ", " << obj.scale.y << ", "
                   << obj.scale.z << "\n"
                   << "  Mass: " << obj.mass << "\n"
@@ -75,6 +75,42 @@ int main() {
                   << "  Acceleration: " << obj.acceleration.x << ", "
                   << obj.acceleration.y << ", " << obj.acceleration.z << "\n";
     }
+    printf("\n");
+
+    if (objects.empty()) {
+        std::cout << "No objects were parsed from the file!\n";
+        return 1;
+    }
+
+    printf("Testing Verlet Integration on first object:\n");
+    state::Object object = objects[0];
+    state::Vec3 new_acceleration = {0, -9.81, 0}; // Example: gravity
+
+    verlet_integration(object, new_acceleration, 1.0f); // 1 s timestep
+
+    std::cout << "Object After 1 Timestep:\n"
+              << "  Position: " << object.position.x << ", "
+              << object.position.y << ", " << object.position.z << "\n"
+              << "  Scale: " << object.scale.x << ", " << object.scale.y << ", "
+              << object.scale.z << "\n"
+              << "  Mass: " << object.mass << "\n"
+              << "  Velocity: " << object.velocity.x << ", "
+              << object.velocity.y << ", " << object.velocity.z << "\n"
+              << "  Acceleration: " << object.acceleration.x << ", "
+              << object.acceleration.y << ", " << object.acceleration.z << "\n";
+
+    verlet_integration(object, new_acceleration, 1.0f); // 1 s timestep
+
+    std::cout << "Object After 2 Timesteps:\n"
+              << "  Position: " << object.position.x << ", "
+              << object.position.y << ", " << object.position.z << "\n"
+              << "  Scale: " << object.scale.x << ", " << object.scale.y << ", "
+              << object.scale.z << "\n"
+              << "  Mass: " << object.mass << "\n"
+              << "  Velocity: " << object.velocity.x << ", "
+              << object.velocity.y << ", " << object.velocity.z << "\n"
+              << "  Acceleration: " << object.acceleration.x << ", "
+              << object.acceleration.y << ", " << object.acceleration.z << "\n";
 
     return 0;
 }
