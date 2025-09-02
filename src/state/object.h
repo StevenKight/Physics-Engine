@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include <constructs.hpp>
+#include <matrix.h>
 
 namespace state {
 
@@ -21,8 +22,7 @@ struct Object {
 
     // Physical Properties
     Vec3 scale;
-    Vec3 center_of_mass;   // Offset from position in local space
-    Mat3x3 inertia_tensor; // How the object resists rotation
+    Vec3 center_of_mass; // Offset from position in local space
 
     // Collision Properties
     double restitution = 0.5; // Bounciness

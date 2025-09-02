@@ -8,14 +8,29 @@
 #include <object.h>
 #include <parser.h>
 
-// Helper function to test and run a function
-void test_and_run_function(char *function_name,
+// Helper function to test and run a function that takes two matrices as params
+void test_and_run_function(const char *function_name,
                            void (*function)(const Matrix *a, const Matrix *b,
                                             Matrix *result),
                            const Matrix *a, const Matrix *b, Matrix *result) {
     // Function Execution
     auto start = std::chrono::high_resolution_clock::now();
     function(a, b, result);
+    auto end = std::chrono::high_resolution_clock::now();
+
+    // Logging
+    std::chrono::duration<float> duration = end - start;
+    printf("%s time: %f seconds\n", function_name, duration.count());
+}
+
+// Helper function to test and run a function that takes two matrices as params
+void test_and_run_scalar_function(
+    const char *function_name,
+    void (*function)(const Matrix *a, float scalar, Matrix *result),
+    const Matrix *a, float scalar, Matrix *result) {
+    // Function Execution
+    auto start = std::chrono::high_resolution_clock::now();
+    function(a, scalar, result);
     auto end = std::chrono::high_resolution_clock::now();
 
     // Logging
@@ -31,6 +46,15 @@ void test_cuda_functions(const Matrix *a, const Matrix *b, Matrix *result) {
     test_and_run_function("Matrix Addition", matrix_add, a, b, result);
 
     test_and_run_function("Matrix Subtraction", matrix_subtract, a, b, result);
+
+    test_and_run_scalar_function("Matrix Scalar Multiplication",
+                                 matrix_scalar_multiply, a, 2.0f, result);
+
+    test_and_run_scalar_function("Matrix Scalar Addition", matrix_scalar_add, a,
+                                 2.0f, result);
+
+    test_and_run_scalar_function("Matrix Scalar Subtraction",
+                                 matrix_scalar_subtract, a, 2.0f, result);
 }
 
 int main() {
@@ -42,6 +66,7 @@ int main() {
 
     initialize_matrix(&a, 25000, 25000);
     initialize_matrix(&b, 25000, 25000);
+    initialize_matrix(&result, 25000, 25000); // Allocate result matrix
     fill_matrix(&a, 1.0f);
     fill_matrix(&b, 2.0f);
 

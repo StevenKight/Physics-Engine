@@ -6,6 +6,7 @@
 
 #include "matrix.h"
 
+// Kernels
 __global__ void matrix_multiply_kernel(
     float *a, int rows_a, int cols_a, 
     float *b, int rows_b, int cols_b, 
@@ -41,6 +42,35 @@ __global__ void matrix_subtract_kernel(float *a, float *b, float *r, int rows, i
     }
 }
 
+__global__ void matrix_scalar_multiply_kernel(float *a, float scalar, float *r, int rows, int cols) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < rows && col < cols) {
+        r[row * cols + col] = a[row * cols + col] * scalar;
+    }
+}
+
+__global__ void matrix_scalar_add_kernel(float *a, float scalar, float *r, int rows, int cols) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < rows && col < cols) {
+        r[row * cols + col] = a[row * cols + col] + scalar;
+    }
+}
+
+__global__ void matrix_scalar_subtract_kernel(float *a, float scalar, float *r, int rows, int cols) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < rows && col < cols) {
+        r[row * cols + col] = a[row * cols + col] - scalar;
+    }
+}
+
+// External Functions
+// Matrix Operations
 extern "C" void matrix_multiply(const Matrix *A, const Matrix *B, Matrix *R) {
     // Allocate matrix dimensions
     int *rows_a = (int *)&A->rows;
@@ -158,6 +188,106 @@ extern "C" void matrix_subtract(const Matrix *A, const Matrix *B, Matrix *R) {
     // Free device memory
     cudaFree(d_a);
     cudaFree(d_b);
+    cudaFree(d_r);
+}
+
+// Scalar operations
+extern "C" void matrix_scalar_multiply(const Matrix *matrix, float scalar, Matrix *result) {
+    // Allocate matrix dimensions
+    int *rows = (int *)&matrix->rows;
+    int *cols = (int *)&matrix->cols;
+
+    // Check if result matrix is allocated
+    if (!result->data) {
+        std::cerr << "Result matrix is not allocated" << std::endl;
+        return;
+    }
+
+    // Allocate device memory
+    float *d_a, *d_r;
+    cudaMalloc((void **)&d_a, (*rows) * (*cols) * sizeof(float));
+    cudaMalloc((void **)&d_r, (*rows) * (*cols) * sizeof(float));
+
+    cudaMemcpy(d_a, matrix->data, (*rows) * (*cols) * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Calculate grid and block sizes
+    dim3 blockSize(16, 16);
+    dim3 gridSize((*cols + blockSize.x - 1) / blockSize.x, (*rows + blockSize.y - 1) / blockSize.y);
+
+    // Launch kernel
+    matrix_scalar_multiply_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, *rows, *cols);
+
+    // Copy result back to host
+    cudaMemcpy(result->data, d_r, (*rows) * (*cols) * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Free device memory
+    cudaFree(d_a);
+    cudaFree(d_r);
+}
+
+extern "C" void matrix_scalar_add(const Matrix *matrix, float scalar, Matrix *result) {
+    // Allocate matrix dimensions
+    int *rows = (int *)&matrix->rows;
+    int *cols = (int *)&matrix->cols;
+
+    // Check if result matrix is allocated
+    if (!result->data) {
+        std::cerr << "Result matrix is not allocated" << std::endl;
+        return;
+    }
+
+    // Allocate device memory
+    float *d_a, *d_r;
+    cudaMalloc((void **)&d_a, (*rows) * (*cols) * sizeof(float));
+    cudaMalloc((void **)&d_r, (*rows) * (*cols) * sizeof(float));
+
+    cudaMemcpy(d_a, matrix->data, (*rows) * (*cols) * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Calculate grid and block sizes
+    dim3 blockSize(16, 16);
+    dim3 gridSize((*cols + blockSize.x - 1) / blockSize.x, (*rows + blockSize.y - 1) / blockSize.y);
+
+    // Launch kernel
+    matrix_scalar_add_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, *rows, *cols);
+
+    // Copy result back to host
+    cudaMemcpy(result->data, d_r, (*rows) * (*cols) * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Free device memory
+    cudaFree(d_a);
+    cudaFree(d_r);
+}
+
+extern "C" void matrix_scalar_subtract(const Matrix *matrix, float scalar, Matrix *result) {
+    // Allocate matrix dimensions
+    int *rows = (int *)&matrix->rows;
+    int *cols = (int *)&matrix->cols;
+
+    // Check if result matrix is allocated
+    if (!result->data) {
+        std::cerr << "Result matrix is not allocated" << std::endl;
+        return;
+    }
+
+    // Allocate device memory
+    float *d_a, *d_r;
+    cudaMalloc((void **)&d_a, (*rows) * (*cols) * sizeof(float));
+    cudaMalloc((void **)&d_r, (*rows) * (*cols) * sizeof(float));
+
+    cudaMemcpy(d_a, matrix->data, (*rows) * (*cols) * sizeof(float), cudaMemcpyHostToDevice);
+
+    // Calculate grid and block sizes
+    dim3 blockSize(16, 16);
+    dim3 gridSize((*cols + blockSize.x - 1) / blockSize.x, (*rows + blockSize.y - 1) / blockSize.y);
+
+    // Launch kernel
+    matrix_scalar_subtract_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, *rows, *cols);
+
+    // Copy result back to host
+    cudaMemcpy(result->data, d_r, (*rows) * (*cols) * sizeof(float), cudaMemcpyDeviceToHost);
+
+    // Free device memory
+    cudaFree(d_a);
     cudaFree(d_r);
 }
 

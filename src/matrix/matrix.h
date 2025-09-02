@@ -30,6 +30,10 @@ void matrix_multiply(const Matrix *a, const Matrix *b, Matrix *result);
 void matrix_add(const Matrix *a, const Matrix *b, Matrix *result);
 void matrix_subtract(const Matrix *a, const Matrix *b, Matrix *result);
 
+void matrix_scalar_multiply(const Matrix *matrix, float scalar, Matrix *result);
+void matrix_scalar_add(const Matrix *matrix, float scalar, Matrix *result);
+void matrix_scalar_subtract(const Matrix *matrix, float scalar, Matrix *result);
+
 #ifdef __cplusplus
 }
 #endif

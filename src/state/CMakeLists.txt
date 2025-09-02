@@ -5,3 +5,6 @@ add_library(state_lib INTERFACE)
 target_include_directories(state_lib INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+# Link to matrix_lib to access matrix.h
+target_link_libraries(state_lib INTERFACE matrix_lib)
