@@ -5,6 +5,7 @@
 
 #include <dummy.h>
 #include <matrix.h>
+#include <object.h>
 #include <parser.h>
 
 // Helper function to test and run a function
