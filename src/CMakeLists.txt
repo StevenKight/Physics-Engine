@@ -3,10 +3,7 @@ add_executable(Physics main.cpp)
 
 # Link to libraries defined in submodules
 target_link_libraries(Physics PRIVATE
-    fortran_lib
-    matrix_lib
-    io_lib
-    state_lib
+    math_lib
 )
 
 # If you need CUDA defines globally

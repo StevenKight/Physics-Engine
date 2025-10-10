@@ -15,11 +15,8 @@ set(CMAKE_CUDA_ARCHITECTURES "native")
 
 # Define subdirectories (modular libraries and main build target)
 set(SUBDIRECTORIES
-    src            # Main application and entry point
-    src/fortran      # Fortran sublibrary (tight loop utilities)
-    src/matrix     # CUDA sublibrary (matrix ops, GPU accel)
-    src/io         # I/O parsing and serialization
-    src/state      # Data models for simulation objects
+    src                 # Main application and entry point
+    src/math            # Math utilities (linear algebra, calculus)
 )
 
 # Include each subdirectory

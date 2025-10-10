@@ -3,7 +3,10 @@ enable_language(Fortran)
 
 # Create a Fortran + C interface library
 add_library(fortran_lib
-    dummy.f90
+    matrix_add.f90
+    matrix_sub.f90
+    matrix_scalar.f90
+    matrix_mul.f90
 )
 
 # Expose the directory so the C++ code can include the Fortran headers
