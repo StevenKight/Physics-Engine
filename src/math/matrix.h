@@ -102,18 +102,42 @@ void matrix_scalar_mul(const void *A, const void *scalar, void *C, int n, int m,
 
 /**
  * @brief Divide each element by a scalar: C = A / scalar (wrapper).
+ *
+ * @param A Pointer to input matrix (see backend layout notes).
+ * @param scalar Pointer to scalar value (Fortran expects double pointer; for
+ * CUDA the scalar is a float value wrapped appropriately).
+ * @param C Pointer to output matrix storage.
+ * @param n Number of rows.
+ * @param m Number of columns.
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_scalar_div(const void *A, const void *scalar, void *C, int n, int m,
                        bool use_gpu);
 
 /**
  * @brief Add scalar to each element: C = A + scalar (wrapper).
+ *
+ * @param A Pointer to input matrix (see backend layout notes).
+ * @param scalar Pointer to scalar value (Fortran expects double pointer; for
+ * CUDA the scalar is a float value wrapped appropriately).
+ * @param C Pointer to output matrix storage.
+ * @param n Number of rows.
+ * @param m Number of columns.
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_scalar_add(const void *A, const void *scalar, void *C, int n, int m,
                        bool use_gpu);
 
 /**
  * @brief Subtract scalar from each element: C = A - scalar (wrapper).
+ *
+ * @param A Pointer to input matrix (see backend layout notes).
+ * @param scalar Pointer to scalar value (Fortran expects double pointer; for
+ * CUDA the scalar is a float value wrapped appropriately).
+ * @param C Pointer to output matrix storage.
+ * @param n Number of rows.
+ * @param m Number of columns.
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_scalar_sub(const void *A, const void *scalar, void *C, int n, int m,
                        bool use_gpu);
