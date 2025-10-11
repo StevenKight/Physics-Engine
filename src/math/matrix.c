@@ -9,13 +9,10 @@
  * conversions for caller buffers.
  *
  * Expectations/Notes:
- * - Fortran backend: caller must pass double-precision arrays in column-major
- *   order. Dimensions are passed by address to match Fortran's ABI.
+ * - Fortran backend: caller must pass double-precision arrays. 
+ *   Dimensions are passed by address to match Fortran's ABI.
  * - CUDA backend: caller must pass pointers to `Matrix` objects (see
  *   `cuda_matrix.h`) containing row-major float data.
- * - The wrappers sometimes implement simple fallback logic (for example,
- *   scalar division for CUDA is implemented via multiplication by the
- *   reciprocal when a direct wrapper is not provided).
  * - These functions are not reentrant with respect to CUDA context setup;
  *   ensure the CUDA runtime is initialized in multithreaded environments.
  *
@@ -61,33 +58,16 @@ void matrix_scalar_mul(const void* A, const void* scalar, void* C, int n, int m,
 
 void matrix_scalar_div(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
     if (use_gpu) {
-        // CUDA does not have a direct scalar division function; implement as multiplication by reciprocal
-        float reciprocal = 1.0f / (*(const float*)scalar);
-        matrix_scalar_multiply_cuda((const Matrix*)A, reciprocal, (Matrix*)C);
+        matrix_scalar_divide_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
     } else {
-        // Fortran does not have a direct scalar division function; implement as multiplication by reciprocal
-        double reciprocal = 1.0 / (*(const double*)scalar);
-        matrix_scalar_mul_f((const double*)A, &reciprocal, (double*)C, &n, &m);
+        matrix_scalar_div_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
     }
 }
 
 void matrix_scalar_add(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
     if (use_gpu) {
-        // CUDA does not have a direct scalar addition function; implement manually
-        Matrix* matA = (Matrix*)A;
-        Matrix* matC = (Matrix*)C;
-        float val = *(const float*)scalar;
-        for (int i = 0; i < matA->rows * matA->cols; ++i) {
-            matC->data[i] = matA->data[i] + val;
-        }
+        matrix_scalar_add_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
     } else {
-        // Fortran does not have a direct scalar addition function; implement manually
-        const double* matA = (const double*)A;
-        double* matC = (double*)C;
-        double val = *(const double*)scalar;
-        for (int i = 0; i < n * m; ++i) {
-            matC[i] = matA[i] + val;
-        }
+        matrix_scalar_add_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
     }
 }
-

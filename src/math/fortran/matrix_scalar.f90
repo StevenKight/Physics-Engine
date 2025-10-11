@@ -11,26 +11,28 @@
 ! Date:   2025-10-09
 !
 module matrix_scalar_mod
+  use iso_c_binding, only: c_double, c_int
   implicit none
 contains
 
   !> Multiply matrix by scalar: C = A * scalar
   !!
   !! Parameters:
-  !!   A(n,m)   - input matrix (real(8)), row dimension n, column dimension m
-  !!   scalar   - input scalar (real(8))
-  !!   C(n,m)   - output matrix (real(8)), must be allocated by the caller
+  !!   A(n,m)   - input matrix (real(c_double)), row-major from C
+  !!   scalar   - input scalar (real(c_double))
+  !!   C(n,m)   - output matrix (real(c_double)), row-major
   !!   n, m     - integer dimensions (rows, cols)
   subroutine matrix_scalar_mul(A, scalar, C, n, m) bind(C, name="matrix_scalar_mul_f")
     implicit none
-    integer, intent(in) :: n, m
-    real(8), intent(in) :: A(n, m)
-    real(8), intent(in) :: scalar
-    real(8), intent(out) :: C(n, m)
-    integer :: i, j
+    integer(c_int), intent(in) :: n, m
+    real(c_double), intent(in) :: A(*)
+    real(c_double), value :: scalar
+    real(c_double), intent(out) :: C(*)
+    integer :: i, j, idx
     do i = 1, n
       do j = 1, m
-        C(i, j) = A(i, j) * scalar
+        idx = (i - 1) * m + (j - 1) + 1
+        C(idx) = A(idx) * scalar
       end do
     end do
   end subroutine matrix_scalar_mul
@@ -38,20 +40,21 @@ contains
   !> Divide matrix by scalar: C = A / scalar
   !!
   !! Parameters:
-  !!   A(n,m)   - input matrix (real(8))
-  !!   scalar   - input scalar (real(8))
-  !!   C(n,m)   - output matrix (real(8))
+  !!   A(n,m)   - input matrix (real(c_double))
+  !!   scalar   - input scalar (real(c_double))
+  !!   C(n,m)   - output matrix (real(c_double))
   !!   n, m     - integer dimensions (rows, cols)
   subroutine matrix_scalar_div(A, scalar, C, n, m) bind(C, name="matrix_scalar_div_f")
     implicit none
-    integer, intent(in) :: n, m
-    real(8), intent(in) :: A(n, m)
-    real(8), intent(in) :: scalar
-    real(8), intent(out) :: C(n, m)
-    integer :: i, j
+    integer(c_int), intent(in) :: n, m
+    real(c_double), intent(in) :: A(*)
+    real(c_double), value :: scalar
+    real(c_double), intent(out) :: C(*)
+    integer :: i, j, idx
     do i = 1, n
       do j = 1, m
-        C(i, j) = A(i, j) / scalar
+        idx = (i - 1) * m + (j - 1) + 1
+        C(idx) = A(idx) / scalar
       end do
     end do
   end subroutine matrix_scalar_div
@@ -59,20 +62,21 @@ contains
   !> Add scalar to matrix: C = A + scalar
   !!
   !! Parameters:
-  !!   A(n,m)   - input matrix (real(8))
-  !!   scalar   - input scalar (real(8))
-  !!   C(n,m)   - output matrix (real(8))
+  !!   A(n,m)   - input matrix (real(c_double))
+  !!   scalar   - input scalar (real(c_double))
+  !!   C(n,m)   - output matrix (real(c_double))
   !!   n, m     - integer dimensions (rows, cols)
   subroutine matrix_scalar_add(A, scalar, C, n, m) bind(C, name="matrix_scalar_add_f")
     implicit none
-    integer, intent(in) :: n, m
-    real(8), intent(in) :: A(n, m)
-    real(8), intent(in) :: scalar
-    real(8), intent(out) :: C(n, m)
-    integer :: i, j
+    integer(c_int), intent(in) :: n, m
+    real(c_double), intent(in) :: A(*)
+    real(c_double), value :: scalar
+    real(c_double), intent(out) :: C(*)
+    integer :: i, j, idx
     do i = 1, n
       do j = 1, m
-        C(i, j) = A(i, j) + scalar
+        idx = (i - 1) * m + (j - 1) + 1
+        C(idx) = A(idx) + scalar
       end do
     end do
   end subroutine matrix_scalar_add
@@ -80,20 +84,21 @@ contains
   !> Subtract scalar from matrix: C = A - scalar
   !!
   !! Parameters:
-  !!   A(n,m)   - input matrix (real(8))
-  !!   scalar   - input scalar (real(8))
-  !!   C(n,m)   - output matrix (real(8))
+  !!   A(n,m)   - input matrix (real(c_double))
+  !!   scalar   - input scalar (real(c_double))
+  !!   C(n,m)   - output matrix (real(c_double))
   !!   n, m     - integer dimensions (rows, cols)
   subroutine matrix_scalar_sub(A, scalar, C, n, m) bind(C, name="matrix_scalar_sub_f")
     implicit none
-    integer, intent(in) :: n, m
-    real(8), intent(in) :: A(n, m)
-    real(8), intent(in) :: scalar
-    real(8), intent(out) :: C(n, m)
-    integer :: i, j
+    integer(c_int), intent(in) :: n, m
+    real(c_double), intent(in) :: A(*)
+    real(c_double), value :: scalar
+    real(c_double), intent(out) :: C(*)
+    integer :: i, j, idx
     do i = 1, n
       do j = 1, m
-        C(i, j) = A(i, j) - scalar
+        idx = (i - 1) * m + (j - 1) + 1
+        C(idx) = A(idx) - scalar
       end do
     end do
   end subroutine matrix_scalar_sub

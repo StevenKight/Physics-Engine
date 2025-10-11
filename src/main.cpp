@@ -4,58 +4,41 @@
 
 #include <chrono>
 #include <iostream>
-#include <vector>
-
-// Helper for Fortran backend (double arrays)
-void fill_matrix_double(std::vector<double> &mat, int n, int m, double value) {
-    std::fill(mat.begin(), mat.end(), value);
-}
-
-// Helper for CUDA backend (Matrix struct)
-Matrix create_and_fill_matrix(int rows, int cols, float value) {
-    Matrix mat;
-    mat.rows = rows;
-    mat.cols = cols;
-    mat.data = new float[rows * cols];
-    for (int i = 0; i < rows * cols; ++i)
-        mat.data[i] = value;
-    return mat;
-}
-
-void free_matrix(Matrix &mat) {
-    delete[] mat.data;
-    mat.data = nullptr;
-}
 
 int main() {
-    const int n = 1024, m = 1024;
+    const int n = 2, m = 2;
     // Fortran test
-    std::vector<double> A_f(n * m), B_f(n * m), C_f(n * m);
-    fill_matrix_double(A_f, n, m, 1.0);
-    fill_matrix_double(B_f, n, m, 2.0);
+    double A[4] = {1.0, 3.0, 2.0, 4.0}; // represents [[1,2],[3,4]]
+    double B[4] = {5.0, 7.0, 6.0, 8.0}; // represents [[5,6],[7,8]]
+    double C[4] = {0.0, 0.0, 0.0, 0.0};
 
     auto start = std::chrono::high_resolution_clock::now();
-    matrix_add(A_f.data(), B_f.data(), C_f.data(), n, m, false);
+    matrix_add(A, B, C, n, m, false);
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "Fortran time: "
               << std::chrono::duration<double, std::milli>(end - start).count()
               << " ms" << std::endl;
+    std::cout << "C after CPU addition: " << C[0] << " " << C[1] << " " << C[2]
+              << " " << C[3] << std::endl;
 
     // CUDA test
-    Matrix A_c = create_and_fill_matrix(n, m, 1.0f);
-    Matrix B_c = create_and_fill_matrix(n, m, 2.0f);
-    Matrix C_c = create_and_fill_matrix(n, m, 0.0f);
+    float A_[4] = {1.0, 3.0, 2.0, 4.0}; // represents [[1,2],[3,4]]
+    float B_[4] = {5.0, 7.0, 6.0, 8.0}; // represents [[5,6],[7,8]]
+    float C_[4] = {0.0, 0.0, 0.0, 0.0};
+
+    // Convert data to Matrix struct for CUDA
+    Matrix A_matrix = {2, 2, A_};
+    Matrix B_matrix = {2, 2, B_};
+    Matrix C_matrix = {2, 2, C_};
 
     start = std::chrono::high_resolution_clock::now();
-    matrix_add(&A_c, &B_c, &C_c, n, m, true);
+    matrix_add(&A_matrix, &B_matrix, &C_matrix, n, m, true);
     end = std::chrono::high_resolution_clock::now();
     std::cout << "CUDA time: "
               << std::chrono::duration<double, std::milli>(end - start).count()
               << " ms" << std::endl;
-
-    free_matrix(A_c);
-    free_matrix(B_c);
-    free_matrix(C_c);
+    std::cout << "C after GPU addition: " << C_[0] << " " << C_[1] << " "
+              << C_[2] << " " << C_[3] << std::endl;
 
     return 0;
 }
