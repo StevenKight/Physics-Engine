@@ -13,6 +13,7 @@ module matrix_mul_mod
   use iso_c_binding, only: c_double, c_int
   implicit none
 contains
+
   !> Matrix multiplication: C = A * B
   !!
   !! Parameters:
@@ -22,24 +23,31 @@ contains
   !!   n, k, m - dimensions (rowsA, sharedDim, colsB)
   subroutine matrix_mul(A, B, C, n, k, m) bind(C, name="matrix_mul_f")
     implicit none
+
+    ! Arguments passed by reference from C
     integer(c_int), intent(in) :: n, k, m
-    real(c_double), intent(in) :: A(*), B(*)
+    real(c_double), intent(in)  :: A(*)
+    real(c_double), intent(in)  :: B(*)
     real(c_double), intent(out) :: C(*)
-    integer :: i, j, l, c_idx, a_idx, b_idx
-    ! Initialize output (remember swapped dims)
-    do i = 1, n*m
-      C(i) = 0.0d0
+
+    integer :: i, j, p
+    integer :: idxA, idxB, idxC
+    real(c_double) :: sum
+
+    ! Matrix multiply: row-major order (C-style)
+    do i = 0, n - 1
+       do j = 0, m - 1
+          sum = 0.0_c_double
+          do p = 0, k - 1
+             idxA = i * k + p
+             idxB = p * m + j
+             sum  = sum + A(idxA + 1) * B(idxB + 1)
+          end do
+          idxC = i * m + j
+          C(idxC + 1) = sum
+       end do
     end do
-    ! Perform multiplication
-    do i = 1, n
-      do j = 1, m
-        do l = 1, k
-          c_idx = (j - 1) * n + (i - 1) + 1
-          a_idx = (l - 1) * n + (i - 1) + 1
-          b_idx = (j - 1) * k + (l - 1) + 1
-          C(c_idx) = C(c_idx) + A(a_idx) * B(b_idx)
-        end do
-      end do
-    end do
+
   end subroutine matrix_mul
+
 end module matrix_mul_mod
