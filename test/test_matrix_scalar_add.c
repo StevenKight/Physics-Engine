@@ -11,7 +11,10 @@ static char *test_matrix_scalar_add_cpu() {
     double scalar = 1.0;
     double C[4] = {0.0, 0.0, 0.0, 0.0};
 
-    matrix_scalar_add(A, &scalar, C, n, m, false);
+    Matrix A_matrix_cpu = {n, m, (float*)(void*)A};
+    Matrix C_matrix_cpu = {n, m, (float*)(void*)C};
+
+    matrix_scalar_add(&A_matrix_cpu, &scalar, &C_matrix_cpu, false);
 
     printf("C after CPU scalar add: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
     mu_assert_double_eq("C[0] incorrect", C[0], 2.0, 1e-9);
@@ -32,7 +35,7 @@ static char *test_matrix_scalar_add_gpu() {
     Matrix A_matrix = {2, 2, A};
     Matrix C_matrix = {2, 2, C};
 
-    matrix_scalar_add(&A_matrix, &scalar, &C_matrix, n, m, true); // use_gpu = true to call CUDA wrapper
+    matrix_scalar_add(&A_matrix, &scalar, &C_matrix, true); // use_gpu = true to call CUDA wrapper
 
     printf("C after GPU scalar add: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
     mu_assert_float_eq("C[0] incorrect", C[0], 2.0, 1e-6);

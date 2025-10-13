@@ -21,63 +21,109 @@
  */
 
 #include "matrix.h"
+#include "cuda/cuda_matrix.h"
 
-void matrix_mul(const void* A, const void* B, void* C, int n, int k, int m, bool use_gpu) {
+void matrix_mul(const void* A, const void* B, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_multiply_cuda((const Matrix*)A, (const Matrix*)B, (Matrix*)C);
-    } else {
-        matrix_mul_f((const double*)A, (const double*)B, (double*)C, &n, &k, &m);
+        return;
     }
+
+    /* For Fortran path we require Matrix* inputs so we can derive sizes. */
+    const Matrix *ma = (const Matrix*)A;
+    const Matrix *mb = (const Matrix*)B;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mb || !mc) return; /* cannot infer dimensions */
+
+    int rn = ma->rows;
+    int rk = ma->cols;
+    int rm = mb->cols;
+    matrix_mul_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rk, &rm);
 }
 
-void matrix_add(const void* A, const void* B, void* C, int n, int m, bool use_gpu) {
+void matrix_add(const void* A, const void* B, void* C, bool use_gpu) {
     if (use_gpu) {
-        // CUDA expects Matrix* structs
         matrix_add_cuda((const Matrix*)A, (const Matrix*)B, (Matrix*)C);
-    } else {
-        // Fortran expects double* arrays
-        matrix_add_f((const double*)A, (const double*)B, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    const Matrix *mb = (const Matrix*)B;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mb || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_add_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rm);
 }
 
-void matrix_sub(const void* A, const void* B, void* C, int n, int m, bool use_gpu) {
+void matrix_sub(const void* A, const void* B, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_subtract_cuda((const Matrix*)A, (const Matrix*)B, (Matrix*)C);
-    } else {
-        matrix_sub_f((const double*)A, (const double*)B, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    const Matrix *mb = (const Matrix*)B;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mb || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_sub_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rm);
 }
 
-void matrix_scalar_mul(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
+void matrix_scalar_mul(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_multiply_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
-    } else {
-        matrix_scalar_mul_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_scalar_mul_f((const double*)ma->data, (const double*)scalar, (double*)mc->data, &rn, &rm);
 }
 
-void matrix_scalar_div(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
+void matrix_scalar_div(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_divide_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
-    } else {
-        matrix_scalar_div_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_scalar_div_f((const double*)ma->data, (const double*)scalar, (double*)mc->data, &rn, &rm);
 }
 
-void matrix_scalar_add(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
+void matrix_scalar_add(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_add_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
-    } else {
-        matrix_scalar_add_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_scalar_add_f((const double*)ma->data, (const double*)scalar, (double*)mc->data, &rn, &rm);
 }
 
-void matrix_scalar_sub(const void* A, const void* scalar, void* C, int n, int m, bool use_gpu) {
+void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         /* CUDA implementation expects a Matrix pointer and a float scalar */
         matrix_scalar_subtract_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
-    } else {
-        /* Fortran implementation expects double arrays and scalar, dimensions by address */
-        matrix_scalar_sub_f((const double*)A, (const double*)scalar, (double*)C, &n, &m);
+        return;
     }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_scalar_sub_f((const double*)ma->data, (const double*)scalar, (double*)mc->data, &rn, &rm);
 }
