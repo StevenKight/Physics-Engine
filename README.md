@@ -17,7 +17,9 @@ C/C++ ties it all together and handles the core simulation logic.
 ## Current State
 
 - CMake build system configured for all three languages compiling together
-- Naive matrix operations implemented in both CUDA and Fortran for baseline testing
+- Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
+- Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
+- Unit test suite covering matrix operations and gravity calculations
 - Rigid body mechanics in active development
 
 The [Wiki](https://github.com/StevenKight/Physics-Engine/wiki) has derivations and math notes as they get worked out.
@@ -41,6 +43,13 @@ cd Physics-Engine
 mkdir build && cd build
 cmake ..
 make
+```
+
+### Running Tests
+
+```bash
+cd build
+ctest
 ```
 
 ---

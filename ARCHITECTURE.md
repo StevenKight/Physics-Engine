@@ -6,37 +6,66 @@ This document outlines the architecture of the High-Performance Physics Engine, 
 Project Structure
 -----------------
 
-Below is the folder and file structure of the physics engine project.
-
 ```
-physics-engine/
+Physics-Engine/
 ├── .vscode/
 │   ├── extensions.json
 │   └── settings.json
 ├── data/
-│   ├── example.phys
-│   └── test.phys
 ├── docs/
 │   └── Wiki...
 ├── src/
-│   ├── fortran/
+│   ├── logic/
 │   │   ├── CMakeLists.txt
-│   │   ├── dummy.f90
-│   │   └── dummy.h
-│   ├── io/
+│   │   ├── gravity.c
+│   │   └── gravity.h
+│   ├── math/
+│   │   ├── cuda/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── cuda_matrix.h
+│   │   │   ├── matrix_core.h
+│   │   │   ├── matrix.cu
+│   │   │   ├── matrix_add.cu
+│   │   │   ├── matrix_div.cu
+│   │   │   ├── matrix_hadamard.cu
+│   │   │   ├── matrix_mul.cu
+│   │   │   ├── matrix_power.cu
+│   │   │   ├── matrix_scalar.cu
+│   │   │   ├── matrix_sub.cu
+│   │   │   └── matrix_sum.cu
+│   │   ├── fortran/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── fortran_matrix.h
+│   │   │   ├── matrix_add.f90
+│   │   │   ├── matrix_div.f90
+│   │   │   ├── matrix_hadamard.f90
+│   │   │   ├── matrix_mul.f90
+│   │   │   ├── matrix_power.f90
+│   │   │   ├── matrix_scalar.f90
+│   │   │   ├── matrix_sub.f90
+│   │   │   └── matrix_sum.f90
 │   │   ├── CMakeLists.txt
-│   │   ├── parser.cu
-│   │   └── parser.h
-│   ├── matrix/
-│   │   ├── CMakeLists.txt
-│   │   ├── matrix.cu
+│   │   ├── matrix.c
 │   │   └── matrix.h
-│   ├── state/
+│   ├── models/
 │   │   ├── CMakeLists.txt
+│   │   ├── object.c
 │   │   └── object.h
 │   ├── CMakeLists.txt
-│   ├── constants.h
 │   └── main.cpp
+├── test/
+│   ├── framework/
+│   │   ├── minunit.h
+│   │   └── test_runner.h
+│   ├── logic/
+│   │   └── test_newtonian_gravity.c
+│   ├── math/
+│   │   ├── test_matrix_add.c
+│   │   ├── test_matrix_mul.c
+│   │   ├── test_matrix_power.c
+│   │   ├── test_matrix_scalar.c
+│   │   └── test_matrix_sub.c
+│   └── CMakeLists.txt
 ├── .clang-format
 ├── .gitignore
 ├── .gitmodules
@@ -50,30 +79,41 @@ physics-engine/
 Directory Overview
 ------------------
 
-- `src/`: This is the main directory for all source code. It's organized into modules, each with a specific responsibility.
-    - `fortran/`: This module contains Fortran code for performance-critical, small-scale numerical calculations. These routines are optimized for fast array manipulations and tight-loop operations that run efficiently on the CPU.
-    - `io/`: This handles input/output operations, such as parsing simulation data from .phys files. The use of .cu files suggests that some parsing logic may be accelerated or interact directly with GPU memory.
-    - `matrix/`: This directory holds the CUDA-based code for GPU-accelerated matrix operations. Offloading these large-scale parallel computations to the GPU is a key part of the engine's high-performance design.
-    - `state/`: This module is responsible for managing the state of physical objects within the simulation, defined in object.h.
-    - `main.cpp`: This is the central entry point of the application, orchestrating the simulation and coordinating the different modules.
-- `data/`: This directory contains sample data files for running simulations. The .phys files likely define the initial conditions and objects for a physics scene.
-- `docs/`: Contains project documentation. The Wiki subdirectory holds detailed mathematical derivations, notes on algorithms, and explanations of how the engine's technologies are used.
-- `.vscode/`: This folder holds project-specific settings for Visual Studio Code, such as recommended extensions and workspace configurations, to ensure a consistent development environment.
-- `CMakeLists.txt`: The main script for the CMake build system, used to configure and build the project across different platforms.
-- `README.md`: Provides a general overview of the project, its goals, key technologies, and setup instructions.
-- `ARCHITECTURE.md`: This file, which describes the project's structure and design.
-- `LICENSE`: Contains the full text of the GNU General Public License v3.0 under which the project is distributed.
-- `.gitignore`, .gitmodules, .clang-format: Standard configuration files for Git and code formatting.
+- `src/`: Main directory for all source code, organised into modules by responsibility.
+    - `math/`: Backend-agnostic matrix operation API. `matrix.h` and `matrix.c` expose a unified interface; each operation accepts a `use_gpu` flag that routes the call to either the `cuda/` or `fortran/` backend at runtime.
+        - `math/cuda/`: CUDA kernels for GPU-accelerated matrix operations. Implements addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, and row/column summing. Uses row-major double-precision storage.
+        - `math/fortran/`: Fortran implementations of the same matrix operations for CPU execution. Uses column-major double-precision arrays; tight-loop structure lets the Fortran compiler apply aggressive optimisations without GPU dispatch overhead.
+    - `logic/`: Physics calculations built on top of the math layer. Currently contains Newtonian N-body gravity (`gravity.c`/`gravity.h`), which decomposes force computation into matrix operations and delegates to the appropriate backend based on problem size.
+    - `models/`: Data structures for simulation objects. Defines `Vec3` (3D double-precision vector) and `PhysicsObject` (mass, position, velocity, acceleration, force).
+    - `main.cpp`: Entry point. Orchestrates the simulation and exercises the engine's subsystems.
+- `test/`: Unit tests mirroring the `src/` module structure.
+    - `test/framework/`: Minimal test utilities (`minunit.h`, `test_runner.h`) used across all tests.
+    - `test/math/`: Tests for each matrix operation, verifying both CPU and GPU backends.
+    - `test/logic/`: Tests for physics calculations, including multi-body gravity scenarios.
+- `data/`: Directory for simulation data files (initial conditions, scene definitions).
+- `docs/`: Project wiki submodule. Contains mathematical derivations, algorithm notes, and design rationale as they are worked out.
+- `.vscode/`: VS Code workspace settings for a consistent development environment.
+- `CMakeLists.txt`: Root CMake script configuring the multi-language build (C, C++, Fortran, CUDA).
+- `.clang-format`: LLVM-style formatting rules enforced across C/C++ code.
 
 Core Technology Integration
 ----------------------------
 
-The engine's architecture is designed around a hybrid CPU/GPU computing model to maximize performance.
+The engine is designed around a hybrid CPU/GPU computing model — routing each computation to whichever hardware is most effective for the scale of work involved.
 
-C++ serves as the primary language, providing the high-level structure and connecting the different specialized modules.
+**C/C++** serves as the primary coordination layer, providing the high-level simulation structure and connecting the specialised modules.
 
-CUDA is used to offload computationally expensive and highly parallelizable tasks—such as matrix operations, collision detection, and force calculations—to the GPU for significant acceleration.
+**CUDA** is used to offload computationally expensive and highly parallelisable work — matrix operations, force calculations, and collision detection — to the GPU.
 
-Fortran is employed for specific, performance-critical numerical calculations that are better suited for the CPU, such as tight-loop operations that do not benefit from massive parallelism.
+**Fortran** handles specific, performance-critical numerical calculations better suited to the CPU: tight-loop operations that do not justify GPU dispatch overhead at small scales.
 
-This combination allows the engine to use the most effective hardware for each type of computation, achieving a high degree of optimization.
+### Computation Routing
+
+A core design principle of the engine is adaptive backend selection. Each subsystem independently decides whether to execute on CPU (Fortran) or GPU (CUDA) based on the scale of the problem, avoiding unnecessary overhead in either direction.
+
+The `math/` layer exposes this through a `use_gpu` flag on every operation. Higher-level subsystems evaluate their own threshold conditions and pass the appropriate flag down. For example, the gravity subsystem currently routes:
+
+- **≤ 64 bodies** → Fortran (CPU): problem is small enough that Fortran's tight-loop optimisations outperform the cost of GPU dispatch and memory transfers.
+- **> 64 bodies** → CUDA (GPU): parallelism benefits exceed dispatch overhead at this scale.
+
+As additional subsystems are implemented (collision detection, constraint solving, etc.), they will follow the same pattern with thresholds tuned for their specific computational characteristics.
