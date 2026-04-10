@@ -171,6 +171,21 @@ void matrix_col_sum(const void* A, void* R, bool use_gpu) {
     matrix_col_sum_f((const double*)ma->data, (double*)mr->data, &rn, &rm);
 }
 
+void matrix_hadamard(const void* A, const void* B, void* C, bool use_gpu) {
+    if (use_gpu) {
+        matrix_hadamard_cuda((const Matrix*)A, (const Matrix*)B, (Matrix*)C);
+        return;
+    }
+
+    const Matrix *ma = (const Matrix*)A;
+    const Matrix *mb = (const Matrix*)B;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mb || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_hadamard_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rm);
+}
+
 void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_subtract_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);

@@ -37,6 +37,21 @@ typedef struct {
     double *data;
 } Matrix;
 
+/**
+ * @brief A rank-3 tensor stored as three component matrices (x, y, z).
+ *
+ * Represents an N×N grid of 3D vectors. Each component matrix has the same
+ * dimensions and can be passed directly to any matrix_* operation.
+ *
+ * Element [i,j] of the represented vector field is:
+ *   { .x = x.data[i*cols+j], .y = y.data[i*cols+j], .z = z.data[i*cols+j] }
+ */
+typedef struct {
+    Matrix x;
+    Matrix y;
+    Matrix z;
+} Matrix3;
+
 /*
  * Wrapper functions for dynamic backend selection.
  *
@@ -183,6 +198,16 @@ void matrix_row_sum(const void *A, void *R, bool use_gpu);
  * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_col_sum(const void *A, void *R, bool use_gpu);
+
+/**
+ * @brief Element-wise matrix multiplication (Hadamard product): C = A ⊙ B
+ *
+ * @param A       Pointer to the first input matrix (see backend layout notes).
+ * @param B       Pointer to the second input matrix (same layout and dims as A).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
+ */
+void matrix_hadamard(const void *A, const void *B, void *C, bool use_gpu);
 
 #ifdef __cplusplus
 }

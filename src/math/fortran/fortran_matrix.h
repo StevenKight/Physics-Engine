@@ -150,6 +150,16 @@ void matrix_row_sum_f(const double *A, double *R, const int *n, const int *m);
  */
 void matrix_col_sum_f(const double *A, double *R, const int *n, const int *m);
 
+/**
+ * @brief Element-wise multiplication (Hadamard product): C = A * B
+ * @param A Pointer to the first input matrix (double*), dimensions n x m
+ * @param B Pointer to the second input matrix (double*), same dimensions as A
+ * @param C Pointer to output matrix storage (double*), dimensions n x m
+ * @param n Pointer to number of rows
+ * @param m Pointer to number of columns
+ */
+void matrix_hadamard_f(const double *A, const double *B, double *C, const int *n, const int *m);
+
 #ifdef __cplusplus
 }
 #endif

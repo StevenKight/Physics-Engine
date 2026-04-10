@@ -140,6 +140,14 @@ void matrix_row_sum_cuda(const Matrix *a, Matrix *result);
  */
 void matrix_col_sum_cuda(const Matrix *a, Matrix *result);
 
+/**
+ * @brief Element-wise multiplication (Hadamard product): result = a * b
+ * @param a      Pointer to the first input matrix (host memory, row-major)
+ * @param b      Pointer to the second input matrix (host memory, row-major)
+ * @param result Pointer to output matrix; must be pre-allocated with same dimensions as A and B
+ */
+void matrix_hadamard_cuda(const Matrix *a, const Matrix *b, Matrix *result);
+
 #ifdef __cplusplus
 }
 #endif

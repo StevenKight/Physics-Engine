@@ -17,3 +17,4 @@
 #include "matrix_power.cu"
 #include "matrix_div.cu"
 #include "matrix_sum.cu"
+#include "matrix_hadamard.cu"
