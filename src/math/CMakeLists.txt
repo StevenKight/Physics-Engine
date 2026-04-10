@@ -5,6 +5,7 @@ add_subdirectory(fortran)
 # Create the main math library that wraps both submodules
 add_library(math_lib
     matrix.c
+    vec3.c
 )
 
 # Expose this directory for includes (so you can #include "matrix.h")
