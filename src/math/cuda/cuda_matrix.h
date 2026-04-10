@@ -25,23 +25,7 @@ extern "C" {
 #define CUDA_HOSTDEV
 #endif
 
-/**
- * @brief Simple matrix container used by CUDA wrappers.
- *
- * This struct represents a matrix stored in host memory using row-major
- * layout (C-style). The CUDA wrappers in this project copy from this
- * host buffer to device buffers before kernel execution and copy results back
- * into the provided `data` buffer.
- *
- * @param rows Number of rows in the matrix (positive integer).
- * @param cols Number of columns in the matrix (positive integer).
- * @param data Pointer to contiguous row-major float data in host memory.
- */
-typedef struct {
-    int rows;
-    int cols;
-    double *data;
-} Matrix;
+#include "../matrix.h"
 
 /* CUDA matrix operations (device and host callable) */
 /**
@@ -119,6 +103,15 @@ void matrix_scalar_add_cuda(const Matrix *matrix, double scalar, Matrix *result)
  */
 void matrix_scalar_subtract_cuda(const Matrix *matrix, double scalar,
                                  Matrix *result);
+
+/**
+ * @brief Element-wise power: result[i,j] = matrix[i,j]^power
+ * @param matrix Pointer to input matrix (host memory, row-major)
+ * @param power  The exponent to raise each element to.
+ * @param result Pointer to output matrix (host memory, row-major); must be
+ *               pre-allocated with the same dimensions as @p matrix.
+ */
+void matrix_power_cuda(const Matrix *matrix, double power, Matrix *result);
 
 #ifdef __cplusplus
 }

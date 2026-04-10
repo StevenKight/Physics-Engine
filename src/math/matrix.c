@@ -21,7 +21,9 @@
  */
 
 #include "matrix.h"
+
 #include "cuda/cuda_matrix.h"
+#include "fortran/fortran_matrix.h"
 
 void matrix_mul(const void* A, const void* B, void* C, bool use_gpu) {
     if (use_gpu) {
@@ -29,11 +31,10 @@ void matrix_mul(const void* A, const void* B, void* C, bool use_gpu) {
         return;
     }
 
-    /* For Fortran path we require Matrix* inputs so we can derive sizes. */
     const Matrix *ma = (const Matrix*)A;
     const Matrix *mb = (const Matrix*)B;
     Matrix *mc = (Matrix*)C;
-    if (!ma || !mb || !mc) return; /* cannot infer dimensions */
+    if (!ma || !mb || !mc) return;
 
     int rn = ma->rows;
     int rk = ma->cols;
@@ -113,9 +114,22 @@ void matrix_scalar_add(const void* A, const void* scalar, void* C, bool use_gpu)
     matrix_scalar_add_f((const double*)ma->data, (const double*)scalar, (double*)mc->data, &rn, &rm);
 }
 
+void matrix_power(const void* A, const void* power, void* C, bool use_gpu) {
+    if (use_gpu) {
+        matrix_power_cuda((const Matrix*)A, *(const double*)power, (Matrix*)C);
+        return;
+    }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_power_f((const double*)ma->data, (const double*)power, (double*)mc->data, &rn, &rm);
+}
+
 void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
-        /* CUDA implementation expects a Matrix pointer and a float scalar */
         matrix_scalar_subtract_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);
         return;
     }

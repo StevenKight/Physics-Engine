@@ -14,3 +14,4 @@
 #include "matrix_add.cu"
 #include "matrix_sub.cu"
 #include "matrix_scalar.cu"
+#include "matrix_power.cu"

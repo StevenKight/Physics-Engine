@@ -1,4 +1,3 @@
-// matrix.h
 /**
  * @file matrix.h
  * @brief High-level matrix API that selects between Fortran and CUDA backends.
@@ -18,12 +17,25 @@
 
 #include <stdbool.h>
 
-#include "cuda/cuda_matrix.h"
-#include "fortran/fortran_matrix.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief Backend-agnostic matrix container.
+ *
+ * Used by both the CUDA and Fortran backends. Data is stored as a flat
+ * row-major array of double-precision values in host memory.
+ *
+ * @param rows Number of rows (positive integer).
+ * @param cols Number of columns (positive integer).
+ * @param data Pointer to contiguous row-major double data in host memory.
+ */
+typedef struct {
+    int rows;
+    int cols;
+    double *data;
+} Matrix;
 
 /*
  * Wrapper functions for dynamic backend selection.
@@ -31,12 +43,12 @@ extern "C" {
  * Notes on layout and types:
  * - Fortran backend expects double precision (double) arrays in column-major
  *   order and integer dimensions passed by value.
- * - CUDA backend expects single precision (float) arrays in row-major order
- *   stored in the Matrix struct defined in cuda_matrix.h.
+ * - CUDA backend expects double precision (double) arrays in row-major order
+ *   stored in the Matrix struct above.
  * - These wrappers do not perform type conversion. The caller must ensure
  *   the memory layout and element type match the backend chosen via
  *   `use_gpu`.
-
+ *
  * When using the Fortran backend (use_gpu == false) these wrappers expect
  * the caller to provide `Matrix*` pointers in `A`, `B`, and `C` so the
  * wrapper can derive dimensions and data pointers from the struct. If the
@@ -131,6 +143,16 @@ void matrix_scalar_add(const void *A, const void *scalar, void *C,
  */
 void matrix_scalar_sub(const void *A, const void *scalar, void *C,
                        bool use_gpu);
+
+/**
+ * @brief Raise each element to a given power: C = A^power (wrapper).
+ *
+ * @param A       Pointer to input matrix (see backend layout notes).
+ * @param power   Pointer to the exponent (double*).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
+ */
+void matrix_power(const void *A, const void *power, void *C, bool use_gpu);
 
 #ifdef __cplusplus
 }

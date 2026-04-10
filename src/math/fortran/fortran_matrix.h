@@ -110,6 +110,16 @@ void matrix_scalar_add_f(const double *A, const double *scalar, double *C,
 void matrix_scalar_sub_f(const double *A, const double *scalar, double *C,
                          const int *n, const int *m);
 
+/**
+ * @brief Element-wise power: C[i,j] = A[i,j]^power
+ * @param A     Pointer to input matrix A (double*), dimensions n x m
+ * @param power Pointer to the exponent (double*). Passed by address for Fortran ABI.
+ * @param C     Pointer to output matrix storage (double*), dimensions n x m
+ * @param n     Pointer to number of rows
+ * @param m     Pointer to number of columns
+ */
+void matrix_power_f(const double *A, const double *power, double *C, const int *n, const int *m);
+
 #ifdef __cplusplus
 }
 #endif

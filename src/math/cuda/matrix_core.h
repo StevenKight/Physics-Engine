@@ -19,15 +19,4 @@
 #include <cuda_runtime.h>
 #include <stdlib.h>
 
-/**
- * @brief Simple matrix container for host/device interop.
- *
- * rows: number of rows in the matrix.
- * cols: number of columns in the matrix.
- * data: pointer to contiguous row-major float data in host memory.
- */
-typedef struct {
-    int rows;
-    int cols;
-    double *data;
-} Matrix;
+#include "../matrix.h"

@@ -9,6 +9,7 @@ add_library(cuda_lib
 # Enable separable compilation for CUDA kernels
 set_target_properties(cuda_lib PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
+    CUDA_RESOLVE_DEVICE_SYMBOLS ON
 )
 
 # Expose this directory as an include path to dependents

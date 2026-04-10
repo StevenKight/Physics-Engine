@@ -7,6 +7,7 @@ set(TEST_SOURCES
     math/test_matrix_sub.c
     math/test_matrix_mul.c
     math/test_matrix_scalar.c
+    math/test_matrix_power.c
 )
 
 foreach(src IN LISTS TEST_SOURCES)

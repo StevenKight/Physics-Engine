@@ -7,6 +7,7 @@ add_library(fortran_lib
     matrix_sub.f90
     matrix_scalar.f90
     matrix_mul.f90
+    matrix_power.f90
 )
 
 # Expose the directory so the C++ code can include the Fortran headers
