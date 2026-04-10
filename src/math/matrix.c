@@ -128,6 +128,21 @@ void matrix_power(const void* A, const void* power, void* C, bool use_gpu) {
     matrix_power_f((const double*)ma->data, (const double*)power, (double*)mc->data, &rn, &rm);
 }
 
+void matrix_div(const void* A, const void* B, void* C, bool use_gpu) {
+    if (use_gpu) {
+        matrix_divide_cuda((const Matrix*)A, (const Matrix*)B, (Matrix*)C);
+        return;
+    }
+
+    const Matrix *ma = (const Matrix*)A;
+    const Matrix *mb = (const Matrix*)B;
+    Matrix *mc = (Matrix*)C;
+    if (!ma || !mb || !mc) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_div_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rm);
+}
+
 void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_subtract_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);

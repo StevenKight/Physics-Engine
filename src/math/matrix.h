@@ -154,6 +154,18 @@ void matrix_scalar_sub(const void *A, const void *scalar, void *C,
  */
 void matrix_power(const void *A, const void *power, void *C, bool use_gpu);
 
+/**
+ * @brief Element-wise matrix division wrapper: C = A / B.
+ *
+ * @param A       Pointer to the numerator matrix (see backend layout notes).
+ * @param B       Pointer to the denominator matrix (same layout and dims as A).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
+ *
+ * @note No division-by-zero checks are performed by either backend.
+ */
+void matrix_div(const void *A, const void *B, void *C, bool use_gpu);
+
 #ifdef __cplusplus
 }
 #endif

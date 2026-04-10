@@ -113,6 +113,17 @@ void matrix_scalar_subtract_cuda(const Matrix *matrix, double scalar,
  */
 void matrix_power_cuda(const Matrix *matrix, double power, Matrix *result);
 
+/**
+ * @brief Element-wise division: result = a / b
+ * @param a Pointer to the numerator matrix (host memory, row-major)
+ * @param b Pointer to the denominator matrix (host memory, row-major)
+ * @param result Pointer to output matrix; must be pre-allocated with same
+ *               dimensions as A and B
+ *
+ * @note No division-by-zero checks are performed in the kernel.
+ */
+void matrix_divide_cuda(const Matrix *a, const Matrix *b, Matrix *result);
+
 #ifdef __cplusplus
 }
 #endif

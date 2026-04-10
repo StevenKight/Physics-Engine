@@ -120,6 +120,18 @@ void matrix_scalar_sub_f(const double *A, const double *scalar, double *C,
  */
 void matrix_power_f(const double *A, const double *power, double *C, const int *n, const int *m);
 
+/**
+ * @brief Element-wise division: C = A / B
+ * @param A Pointer to the numerator matrix (double*), dimensions n x m
+ * @param B Pointer to the denominator matrix (double*), same dimensions as A
+ * @param C Pointer to output matrix storage (double*), dimensions n x m
+ * @param n Pointer to number of rows
+ * @param m Pointer to number of columns
+ *
+ * @note No division-by-zero checks are performed in the Fortran implementation.
+ */
+void matrix_div_f(const double *A, const double *B, double *C, const int *n, const int *m);
+
 #ifdef __cplusplus
 }
 #endif
