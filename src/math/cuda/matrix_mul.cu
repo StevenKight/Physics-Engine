@@ -30,15 +30,15 @@
  * @param[in] cols_r Number of cols in result
  */
 __global__ void matrix_multiply_kernel(
-    float *a, int rows_a, int cols_a, 
-    float *b, int rows_b, int cols_b, 
-    float *r, int rows_r, int cols_r
+    double *a, int rows_a, int cols_a,
+    double *b, int rows_b, int cols_b,
+    double *r, int rows_r, int cols_r
 ) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (row < rows_r && col < cols_r) {
-        float sum = 0.0f;
+        double sum = 0.0;
         for (int k = 0; k < cols_a; k++) {
             sum += a[row * cols_a + k] * b[k * cols_b + col];
         }
@@ -62,18 +62,18 @@ extern "C" void matrix_multiply_cuda(const Matrix *A, const Matrix *B, Matrix *R
         return;
     }
 
-    float *d_a, *d_b, *d_r;
-    cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(float));
-    cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(float));
+    double *d_a, *d_b, *d_r;
+    cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(double));
+    cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double), cudaMemcpyHostToDevice);
 
     dim3 blockSize(16, 16);
     dim3 gridSize((R->cols + 15) / 16, (R->rows + 15) / 16);
     matrix_multiply_kernel<<<gridSize, blockSize>>>(d_a, A->rows, A->cols, d_b, B->rows, B->cols, d_r, R->rows, R->cols);
 
-    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_b); cudaFree(d_r);
 }

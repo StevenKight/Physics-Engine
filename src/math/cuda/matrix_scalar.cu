@@ -21,7 +21,7 @@
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_scalar_multiply_kernel(float *a, float scalar, float *r, int rows, int cols) {
+__global__ void matrix_scalar_multiply_kernel(double *a, double scalar, double *r, int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     if (row < rows && col < cols)
@@ -37,7 +37,7 @@ __global__ void matrix_scalar_multiply_kernel(float *a, float scalar, float *r, 
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_scalar_divide_kernel(float *a, float scalar, float *r, int rows, int cols) {
+__global__ void matrix_scalar_divide_kernel(double *a, double scalar, double *r, int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     if (row < rows && col < cols)
@@ -53,7 +53,7 @@ __global__ void matrix_scalar_divide_kernel(float *a, float scalar, float *r, in
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_scalar_add_kernel(float *a, float scalar, float *r, int rows, int cols) {
+__global__ void matrix_scalar_add_kernel(double *a, double scalar, double *r, int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     if (row < rows && col < cols)
@@ -69,7 +69,7 @@ __global__ void matrix_scalar_add_kernel(float *a, float scalar, float *r, int r
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_scalar_subtract_kernel(float *a, float scalar, float *r, int rows, int cols) {
+__global__ void matrix_scalar_subtract_kernel(double *a, double scalar, double *r, int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     if (row < rows && col < cols)
@@ -86,16 +86,16 @@ __global__ void matrix_scalar_subtract_kernel(float *a, float scalar, float *r, 
  * @param[in] scalar Scalar multiplier
  * @param[out] r Pointer to result matrix (host memory)
  */
-extern "C" void matrix_scalar_multiply_cuda(const Matrix *m, float scalar, Matrix *r) {
-    float *d_a, *d_r;
-    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(float));
+extern "C" void matrix_scalar_multiply_cuda(const Matrix *m, double scalar, Matrix *r) {
+    double *d_a, *d_r;
+    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(double));
 
-    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(double), cudaMemcpyHostToDevice);
     dim3 blockSize(16, 16);
     dim3 gridSize((m->cols + 15) / 16, (m->rows + 15) / 16);
     matrix_scalar_multiply_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, m->rows, m->cols);
-    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_r);
 }
 
@@ -109,16 +109,16 @@ extern "C" void matrix_scalar_multiply_cuda(const Matrix *m, float scalar, Matri
  * @param[in] scalar Scalar divisor
  * @param[out] r Pointer to result matrix (host memory)
  */
-extern "C" void matrix_scalar_divide_cuda(const Matrix *m, float scalar, Matrix *r) {
-    float *d_a, *d_r;
-    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(float));
+extern "C" void matrix_scalar_divide_cuda(const Matrix *m, double scalar, Matrix *r) {
+    double *d_a, *d_r;
+    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(double));
 
-    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(double), cudaMemcpyHostToDevice);
     dim3 blockSize(16, 16);
     dim3 gridSize((m->cols + 15) / 16, (m->rows + 15) / 16);
     matrix_scalar_divide_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, m->rows, m->cols);
-    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_r);
 }
 
@@ -132,16 +132,16 @@ extern "C" void matrix_scalar_divide_cuda(const Matrix *m, float scalar, Matrix 
  * @param[in] scalar Scalar to add
  * @param[out] r Pointer to result matrix (host memory)
  */
-extern "C" void matrix_scalar_add_cuda(const Matrix *m, float scalar, Matrix *r) {
-    float *d_a, *d_r;
-    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(float));
+extern "C" void matrix_scalar_add_cuda(const Matrix *m, double scalar, Matrix *r) {
+    double *d_a, *d_r;
+    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(double));
 
-    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(double), cudaMemcpyHostToDevice);
     dim3 blockSize(16, 16);
     dim3 gridSize((m->cols + 15) / 16, (m->rows + 15) / 16);
     matrix_scalar_add_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, m->rows, m->cols);
-    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_r);
 }
 
@@ -154,15 +154,15 @@ extern "C" void matrix_scalar_add_cuda(const Matrix *m, float scalar, Matrix *r)
  * @param[in] scalar Scalar to subtract
  * @param[out] r Pointer to result matrix (host memory)
  */
-extern "C" void matrix_scalar_subtract_cuda(const Matrix *m, float scalar, Matrix *r) {
-    float *d_a, *d_r;
-    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(float));
+extern "C" void matrix_scalar_subtract_cuda(const Matrix *m, double scalar, Matrix *r) {
+    double *d_a, *d_r;
+    cudaMalloc((void **)&d_a, m->rows * m->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, m->rows * m->cols * sizeof(double));
 
-    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, m->data, m->rows * m->cols * sizeof(double), cudaMemcpyHostToDevice);
     dim3 blockSize(16, 16);
     dim3 gridSize((m->cols + 15) / 16, (m->rows + 15) / 16);
     matrix_scalar_subtract_kernel<<<gridSize, blockSize>>>(d_a, scalar, d_r, m->rows, m->cols);
-    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(r->data, d_r, m->rows * m->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_r);
 }

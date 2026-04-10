@@ -73,7 +73,7 @@ void matrix_sub(const void* A, const void* B, void* C, bool use_gpu) {
 
 void matrix_scalar_mul(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
-        matrix_scalar_multiply_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
+        matrix_scalar_multiply_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);
         return;
     }
 
@@ -87,7 +87,7 @@ void matrix_scalar_mul(const void* A, const void* scalar, void* C, bool use_gpu)
 
 void matrix_scalar_div(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
-        matrix_scalar_divide_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
+        matrix_scalar_divide_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);
         return;
     }
 
@@ -101,7 +101,7 @@ void matrix_scalar_div(const void* A, const void* scalar, void* C, bool use_gpu)
 
 void matrix_scalar_add(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
-        matrix_scalar_add_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
+        matrix_scalar_add_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);
         return;
     }
 
@@ -116,7 +116,7 @@ void matrix_scalar_add(const void* A, const void* scalar, void* C, bool use_gpu)
 void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         /* CUDA implementation expects a Matrix pointer and a float scalar */
-        matrix_scalar_subtract_cuda((const Matrix*)A, *(const float*)scalar, (Matrix*)C);
+        matrix_scalar_subtract_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);
         return;
     }
 

@@ -11,8 +11,8 @@ static char *test_matrix_scalar_sub_cpu() {
     double scalar = 1.0;
     double C[4] = {0.0, 0.0, 0.0, 0.0};
 
-    Matrix A_matrix_cpu = {n, m, (float*)(void*)A};
-    Matrix C_matrix_cpu = {n, m, (float*)(void*)C};
+    Matrix A_matrix_cpu = {n, m, A};
+    Matrix C_matrix_cpu = {n, m, C};
 
     matrix_scalar_sub(&A_matrix_cpu, &scalar, &C_matrix_cpu, false);
 
@@ -28,9 +28,9 @@ static char *test_matrix_scalar_sub_cpu() {
 static char *test_matrix_scalar_sub_gpu() {
     int n = 2, m = 2;
 
-    float A[4] = {1.0, 3.0, 2.0, 4.0};
-    float scalar = 1.0f;
-    float C[4] = {0.0, 0.0, 0.0, 0.0};
+    double A[4] = {1.0, 3.0, 2.0, 4.0};
+    double scalar = 1.0;
+    double C[4] = {0.0, 0.0, 0.0, 0.0};
 
     Matrix A_matrix = {2, 2, A};
     Matrix C_matrix = {2, 2, C};
@@ -38,10 +38,10 @@ static char *test_matrix_scalar_sub_gpu() {
     matrix_scalar_sub(&A_matrix, &scalar, &C_matrix, true); // use_gpu = true to call CUDA wrapper
 
     printf("C after GPU scalar sub: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_float_eq("C[0] incorrect", C[0], 0.0, 1e-6);
-    mu_assert_float_eq("C[1] incorrect", C[1], 2.0, 1e-6);
-    mu_assert_float_eq("C[2] incorrect", C[2], 1.0, 1e-6);
-    mu_assert_float_eq("C[3] incorrect", C[3], 3.0, 1e-6);
+    mu_assert_double_eq("C[0] incorrect", C[0], 0.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], 2.0, 1e-9);
+    mu_assert_double_eq("C[2] incorrect", C[2], 1.0, 1e-9);
+    mu_assert_double_eq("C[3] incorrect", C[3], 3.0, 1e-9);
 
     return 0;
 }

@@ -11,9 +11,9 @@ static char *test_matrix_sub_cpu() {
     double B[4] = {5.0, 8.0, 8.0, 11.0};
     double C[4] = {0.0, 0.0, 0.0, 0.0};
 
-    Matrix A_matrix_cpu = {n, m, (float*)(void*)A};
-    Matrix B_matrix_cpu = {n, m, (float*)(void*)B};
-    Matrix C_matrix_cpu = {n, m, (float*)(void*)C};
+    Matrix A_matrix_cpu = {n, m, A};
+    Matrix B_matrix_cpu = {n, m, B};
+    Matrix C_matrix_cpu = {n, m, C};
 
     matrix_sub(&A_matrix_cpu, &B_matrix_cpu, &C_matrix_cpu, false);
 
@@ -29,9 +29,9 @@ static char *test_matrix_sub_cpu() {
 static char *test_matrix_sub_gpu() {
     int n = 2, m = 2;
 
-    float A[4] = {1.0, 3.0, 2.0, 4.0};
-    float B[4] = {5.0, 8.0, 8.0, 11.0};
-    float C[4] = {0.0, 0.0, 0.0, 0.0};
+    double A[4] = {1.0, 3.0, 2.0, 4.0};
+    double B[4] = {5.0, 8.0, 8.0, 11.0};
+    double C[4] = {0.0, 0.0, 0.0, 0.0};
 
     Matrix A_matrix = {2, 2, A};
     Matrix B_matrix = {2, 2, B};
@@ -40,10 +40,10 @@ static char *test_matrix_sub_gpu() {
     matrix_sub(&A_matrix, &B_matrix, &C_matrix, true); // use_gpu = true to call CUDA wrapper
 
     printf("C after GPU subtraction: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_float_eq("C[0] incorrect", C[0], -4.0, 1e-6);
-    mu_assert_float_eq("C[1] incorrect", C[1], -5.0, 1e-6);
-    mu_assert_float_eq("C[2] incorrect", C[2], -6.0, 1e-6);
-    mu_assert_float_eq("C[3] incorrect", C[3], -7.0, 1e-6);
+    mu_assert_double_eq("C[0] incorrect", C[0], -4.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], -5.0, 1e-9);
+    mu_assert_double_eq("C[2] incorrect", C[2], -6.0, 1e-9);
+    mu_assert_double_eq("C[3] incorrect", C[3], -7.0, 1e-9);
 
     return 0;
 }

@@ -16,7 +16,7 @@
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_subtract_kernel(float *a, float *b, float *r, int rows, int cols) {
+__global__ void matrix_subtract_kernel(double *a, double *b, double *r, int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -42,18 +42,18 @@ extern "C" void matrix_subtract_cuda(const Matrix *A, const Matrix *B, Matrix *R
         return;
     }
 
-    float *d_a, *d_b, *d_r;
-    cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(float));
-    cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(float));
-    cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(float));
+    double *d_a, *d_b, *d_r;
+    cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(double));
+    cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(double));
+    cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double), cudaMemcpyHostToDevice);
 
     dim3 blockSize(16, 16);
     dim3 gridSize((A->cols + 15) / 16, (A->rows + 15) / 16);
     matrix_subtract_kernel<<<gridSize, blockSize>>>(d_a, d_b, d_r, A->rows, A->cols);
 
-    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double), cudaMemcpyDeviceToHost);
     cudaFree(d_a); cudaFree(d_b); cudaFree(d_r);
 }

@@ -40,7 +40,7 @@ extern "C" {
 typedef struct {
     int rows;
     int cols;
-    float *data;
+    double *data;
 } Matrix;
 
 /* CUDA matrix operations (device and host callable) */
@@ -89,7 +89,7 @@ void matrix_multiply_cuda(const Matrix *a, const Matrix *b, Matrix *result);
  * @param scalar Scalar multiplier
  * @param result Pointer to output matrix (host memory, row-major)
  */
-void matrix_scalar_multiply_cuda(const Matrix *matrix, float scalar,
+void matrix_scalar_multiply_cuda(const Matrix *matrix, double scalar,
                                  Matrix *result);
 
 /**
@@ -100,7 +100,7 @@ void matrix_scalar_multiply_cuda(const Matrix *matrix, float scalar,
  *
  * @note No explicit division-by-zero checks are performed in the wrapper.
  */
-void matrix_scalar_divide_cuda(const Matrix *matrix, float scalar,
+void matrix_scalar_divide_cuda(const Matrix *matrix, double scalar,
                                Matrix *result);
 
 /**
@@ -109,7 +109,7 @@ void matrix_scalar_divide_cuda(const Matrix *matrix, float scalar,
  * @param scalar Scalar to add
  * @param result Pointer to output matrix (host memory, row-major)
  */
-void matrix_scalar_add_cuda(const Matrix *matrix, float scalar, Matrix *result);
+void matrix_scalar_add_cuda(const Matrix *matrix, double scalar, Matrix *result);
 
 /**
  * @brief Element-wise scalar subtraction: result = matrix - scalar
@@ -117,7 +117,7 @@ void matrix_scalar_add_cuda(const Matrix *matrix, float scalar, Matrix *result);
  * @param scalar Scalar to subtract
  * @param result Pointer to output matrix (host memory, row-major)
  */
-void matrix_scalar_subtract_cuda(const Matrix *matrix, float scalar,
+void matrix_scalar_subtract_cuda(const Matrix *matrix, double scalar,
                                  Matrix *result);
 
 #ifdef __cplusplus

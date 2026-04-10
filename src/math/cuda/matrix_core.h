@@ -29,5 +29,5 @@
 typedef struct {
     int rows;
     int cols;
-    float *data;
+    double *data;
 } Matrix;
