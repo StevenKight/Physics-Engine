@@ -14,11 +14,14 @@ set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 set(CMAKE_CUDA_ARCHITECTURES "native")
 
 enable_testing()
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Define subdirectories (modular libraries and main build target)
 set(SUBDIRECTORIES
     src                 # Main application and entry point
     src/math            # Math utilities (linear algebra, calculus)
+    src/models          # Data models (physics objects, bodies, etc.)
+    src/logic           # Physics logic (gravity, forces, etc.)
     test                # Unit tests
 )
 

@@ -4,6 +4,8 @@ add_executable(Physics main.cpp)
 # Link to libraries defined in submodules
 target_link_libraries(Physics PRIVATE
     math_lib
+    models_lib
+    logic_lib
 )
 
 # If you need CUDA defines globally

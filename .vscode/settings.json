@@ -2,5 +2,8 @@
     "[cpp]": {
         "editor.defaultFormatter": "xaver.clang-format",
         "editor.formatOnSave": true
-    }
+    },
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build"
+    ]
 }
