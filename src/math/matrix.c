@@ -143,6 +143,34 @@ void matrix_div(const void* A, const void* B, void* C, bool use_gpu) {
     matrix_div_f((const double*)ma->data, (const double*)mb->data, (double*)mc->data, &rn, &rm);
 }
 
+void matrix_row_sum(const void* A, void* R, bool use_gpu) {
+    if (use_gpu) {
+        matrix_row_sum_cuda((const Matrix*)A, (Matrix*)R);
+        return;
+    }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mr = (Matrix*)R;
+    if (!ma || !mr) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_row_sum_f((const double*)ma->data, (double*)mr->data, &rn, &rm);
+}
+
+void matrix_col_sum(const void* A, void* R, bool use_gpu) {
+    if (use_gpu) {
+        matrix_col_sum_cuda((const Matrix*)A, (Matrix*)R);
+        return;
+    }
+
+    const Matrix *ma = (const Matrix*)A;
+    Matrix *mr = (Matrix*)R;
+    if (!ma || !mr) return;
+    int rn = ma->rows;
+    int rm = ma->cols;
+    matrix_col_sum_f((const double*)ma->data, (double*)mr->data, &rn, &rm);
+}
+
 void matrix_scalar_sub(const void* A, const void* scalar, void* C, bool use_gpu) {
     if (use_gpu) {
         matrix_scalar_subtract_cuda((const Matrix*)A, *(const double*)scalar, (Matrix*)C);

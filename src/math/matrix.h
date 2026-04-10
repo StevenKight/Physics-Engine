@@ -166,6 +166,24 @@ void matrix_power(const void *A, const void *power, void *C, bool use_gpu);
  */
 void matrix_div(const void *A, const void *B, void *C, bool use_gpu);
 
+/**
+ * @brief Sum each row into a column vector: R[i] = sum_j A[i,j]
+ *
+ * @param A       Pointer to input matrix (see backend layout notes).
+ * @param R       Pointer to output matrix (pre-allocated, rows x 1).
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
+ */
+void matrix_row_sum(const void *A, void *R, bool use_gpu);
+
+/**
+ * @brief Sum each column into a row vector: R[j] = sum_i A[i,j]
+ *
+ * @param A       Pointer to input matrix (see backend layout notes).
+ * @param R       Pointer to output matrix (pre-allocated, 1 x cols).
+ * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
+ */
+void matrix_col_sum(const void *A, void *R, bool use_gpu);
+
 #ifdef __cplusplus
 }
 #endif

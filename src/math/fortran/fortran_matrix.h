@@ -132,6 +132,24 @@ void matrix_power_f(const double *A, const double *power, double *C, const int *
  */
 void matrix_div_f(const double *A, const double *B, double *C, const int *n, const int *m);
 
+/**
+ * @brief Sum each row into a column vector: R[i] = sum_j A[i,j]
+ * @param A Pointer to input matrix (double*), dimensions n x m
+ * @param R Pointer to output vector (double*), length n, allocated by caller
+ * @param n Pointer to number of rows
+ * @param m Pointer to number of columns
+ */
+void matrix_row_sum_f(const double *A, double *R, const int *n, const int *m);
+
+/**
+ * @brief Sum each column into a row vector: R[j] = sum_i A[i,j]
+ * @param A Pointer to input matrix (double*), dimensions n x m
+ * @param R Pointer to output vector (double*), length m, allocated by caller
+ * @param n Pointer to number of rows
+ * @param m Pointer to number of columns
+ */
+void matrix_col_sum_f(const double *A, double *R, const int *n, const int *m);
+
 #ifdef __cplusplus
 }
 #endif

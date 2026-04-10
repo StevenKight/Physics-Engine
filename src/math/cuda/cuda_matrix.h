@@ -124,6 +124,22 @@ void matrix_power_cuda(const Matrix *matrix, double power, Matrix *result);
  */
 void matrix_divide_cuda(const Matrix *a, const Matrix *b, Matrix *result);
 
+/**
+ * @brief Sum each row into a column vector: R[i] = sum_j A[i,j]
+ * @param a Pointer to input matrix (host memory, rows x cols)
+ * @param result Pointer to output matrix (host memory, rows x 1). Must be
+ *               pre-allocated with rows equal to A->rows and cols equal to 1.
+ */
+void matrix_row_sum_cuda(const Matrix *a, Matrix *result);
+
+/**
+ * @brief Sum each column into a row vector: R[j] = sum_i A[i,j]
+ * @param a Pointer to input matrix (host memory, rows x cols)
+ * @param result Pointer to output matrix (host memory, 1 x cols). Must be
+ *               pre-allocated with rows equal to 1 and cols equal to A->cols.
+ */
+void matrix_col_sum_cuda(const Matrix *a, Matrix *result);
+
 #ifdef __cplusplus
 }
 #endif
