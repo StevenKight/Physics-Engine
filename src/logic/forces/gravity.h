@@ -13,7 +13,7 @@
 #ifndef GRAVITY_H
 #define GRAVITY_H
 
-#include "../models/object.h"
+#include "../../models/object.h"
 
 #ifdef __cplusplus
 extern "C" {

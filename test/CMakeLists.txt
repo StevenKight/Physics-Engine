@@ -56,11 +56,12 @@ foreach(src IN LISTS LOGIC_TEST_SOURCES)
 
     target_include_directories(${test_name} PRIVATE
         ${CMAKE_SOURCE_DIR}/src/logic
+        ${CMAKE_SOURCE_DIR}/src/logic/forces
         ${CMAKE_SOURCE_DIR}/src/models
         ${CMAKE_CURRENT_SOURCE_DIR}/framework
     )
 
-    target_link_libraries(${test_name} PRIVATE logic_lib)
+    target_link_libraries(${test_name} PRIVATE logic_lib forces_lib)
 
     add_test(NAME ${test_name} COMMAND ${test_name})
 endforeach()

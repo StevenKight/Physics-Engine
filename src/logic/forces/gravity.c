@@ -11,8 +11,8 @@
  */
 
 #include "gravity.h"
-#include "../math/matrix.h"
-#include "object.h"
+#include "../../math/matrix.h"
+#include "../../models/object.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -305,7 +305,7 @@ void newtonian_gravity_directions(const PhysicsObject *objects, int count, Matri
     // ── Step 4: r = sqrt(r²_safe),  then D_hat[i,j] = D[i,j] / r[i,j] ──────
     double *r_data = calloc(count * count, sizeof(double));
     Matrix r_mat = { count, count, r_data };
-    
+
     matrix_power(&safe_dist, &half, &r_mat, use_gpu);
     free(safe_dist_data);
 

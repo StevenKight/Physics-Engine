@@ -14,7 +14,7 @@
  * @date 2026-04-10
  */
 
-#include "gravity.h"
+#include "forces/gravity.h"
 #include "test_runner.h"
 #include <stdio.h>
 
