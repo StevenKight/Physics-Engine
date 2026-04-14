@@ -14,11 +14,17 @@ Physics-Engine/
 ├── data/
 ├── docs/
 │   └── Wiki...
+├── interface/
+│   └── nbody.py
 ├── src/
 │   ├── logic/
+│   │   ├── forces/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── gravity.c
+│   │   │   └── gravity.h
 │   │   ├── CMakeLists.txt
-│   │   ├── gravity.c
-│   │   └── gravity.h
+│   │   ├── sim.c
+│   │   └── sim.h
 │   ├── math/
 │   │   ├── cuda/
 │   │   │   ├── CMakeLists.txt
@@ -46,7 +52,9 @@ Physics-Engine/
 │   │   │   └── matrix_sum.f90
 │   │   ├── CMakeLists.txt
 │   │   ├── matrix.c
-│   │   └── matrix.h
+│   │   ├── matrix.h
+│   │   ├── vec3.c
+│   │   └── vec3.h
 │   ├── models/
 │   │   ├── CMakeLists.txt
 │   │   ├── object.c
@@ -65,6 +73,8 @@ Physics-Engine/
 │   │   ├── test_matrix_power.c
 │   │   ├── test_matrix_scalar.c
 │   │   └── test_matrix_sub.c
+│   ├── models/
+│   │   └── test_object_step.c
 │   └── CMakeLists.txt
 ├── .clang-format
 ├── .gitignore
@@ -80,16 +90,20 @@ Directory Overview
 ------------------
 
 - `src/`: Main directory for all source code, organised into modules by responsibility.
-    - `math/`: Backend-agnostic matrix operation API. `matrix.h` and `matrix.c` expose a unified interface; each operation accepts a `use_gpu` flag that routes the call to either the `cuda/` or `fortran/` backend at runtime.
+    - `math/`: Backend-agnostic matrix operation API. `matrix.h` and `matrix.c` expose a unified interface; each operation accepts a `use_gpu` flag that routes the call to either the `cuda/` or `fortran/` backend at runtime. Also contains `vec3.h`/`vec3.c`, a lightweight 3D double-precision vector type used throughout the engine.
         - `math/cuda/`: CUDA kernels for GPU-accelerated matrix operations. Implements addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, and row/column summing. Uses row-major double-precision storage.
         - `math/fortran/`: Fortran implementations of the same matrix operations for CPU execution. Uses column-major double-precision arrays; tight-loop structure lets the Fortran compiler apply aggressive optimisations without GPU dispatch overhead.
-    - `logic/`: Physics calculations built on top of the math layer. Currently contains Newtonian N-body gravity (`gravity.c`/`gravity.h`), which decomposes force computation into matrix operations and delegates to the appropriate backend based on problem size.
-    - `models/`: Data structures for simulation objects. Defines `Vec3` (3D double-precision vector) and `PhysicsObject` (mass, position, velocity, acceleration, force).
+    - `logic/`: Physics calculations built on top of the math layer. Contains `sim.c`/`sim.h`, which drives the top-level N-body simulation loop (`sim_run`): each tick accumulates forces on all objects, then advances each object via Velocity Verlet integration.
+        - `logic/forces/`: Force implementations. Currently contains Newtonian N-body gravity (`gravity.c`/`gravity.h`), which decomposes force computation into matrix operations and delegates to the appropriate backend based on problem size.
+    - `models/`: Data structures for simulation objects. `object.h`/`object.c` define `PhysicsObject` (mass, position, velocity, acceleration, force — all using `Vec3`) and `object_step()`, which advances an object by one Velocity Verlet step and resets its accumulated force.
     - `main.cpp`: Entry point. Orchestrates the simulation and exercises the engine's subsystems.
+- `interface/`: Language bindings for the compiled shared library.
+    - `interface/nbody.py`: Python ctypes interface. Mirrors the `Vec3` and `PhysicsObject` C structs and exposes `sim_run()` so simulations can be driven from Python without recompiling.
 - `test/`: Unit tests mirroring the `src/` module structure.
     - `test/framework/`: Minimal test utilities (`minunit.h`, `test_runner.h`) used across all tests.
     - `test/math/`: Tests for each matrix operation, verifying both CPU and GPU backends.
     - `test/logic/`: Tests for physics calculations, including multi-body gravity scenarios.
+    - `test/models/`: Tests for simulation object behaviour, including Velocity Verlet integration correctness.
 - `data/`: Directory for simulation data files (initial conditions, scene definitions).
 - `docs/`: Project wiki submodule. Contains mathematical derivations, algorithm notes, and design rationale as they are worked out.
 - `.vscode/`: VS Code workspace settings for a consistent development environment.

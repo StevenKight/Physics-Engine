@@ -18,9 +18,11 @@ C/C++ ties it all together and handles the core simulation logic.
 
 - CMake build system configured for all three languages compiling together
 - Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
+- `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_step`)
 - Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
-- Unit test suite covering matrix operations and gravity calculations
-- Rigid body mechanics in active development
+- Top-level `sim_run` simulation loop wiring force accumulation and object integration together
+- Python ctypes interface (`interface/nbody.py`) for driving simulations from Python without recompiling
+- Unit test suite covering matrix operations, gravity calculations, and Velocity Verlet integration
 
 The [Wiki](https://github.com/StevenKight/Physics-Engine/wiki) has derivations and math notes as they get worked out.
 
@@ -61,7 +63,6 @@ ctest
 - Benchmarking against existing engines
 - Soft-body dynamics and constraint systems
 - Mixed-precision arithmetic for GPU throughput
-- Shared library interface for external use
 - Rendering pipeline integration
 
 ---
