@@ -51,7 +51,7 @@ void object_init(PhysicsObject *obj, double mass, double x, double y, double z);
  * @param obj        Pointer to the object to advance.
  * @param time_step  Duration of the time step (s).
  */
-void step(PhysicsObject *obj, double time_step);
+void object_step(PhysicsObject *obj, double time_step);
 
 #ifdef __cplusplus
 }

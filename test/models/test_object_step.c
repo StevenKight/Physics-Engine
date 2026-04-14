@@ -27,7 +27,7 @@ static char *test_rest_no_force() {
         .force        = {0.0, 0.0, 0.0},
     };
 
-    step(&obj, 1.0);
+    object_step(&obj, 1.0);
 
     mu_assert_double_eq("rest: pos.x != 0", obj.position.x, 0.0, 1e-15);
     mu_assert_double_eq("rest: pos.y != 0", obj.position.y, 0.0, 1e-15);
@@ -54,7 +54,7 @@ static char *test_uniform_motion() {
         .force        = {0.0, 0.0, 0.0},
     };
 
-    step(&obj, 0.5);
+    object_step(&obj, 0.5);
 
     mu_assert_double_eq("uniform: pos.x != 3",   obj.position.x, 3.0, 1e-15);
     mu_assert_double_eq("uniform: pos.y != 4.5", obj.position.y, 4.5, 1e-15);
@@ -84,7 +84,7 @@ static char *test_constant_force_first_step() {
         .force        = {4.0, 0.0, 0.0},
     };
 
-    step(&obj, 1.0);
+    object_step(&obj, 1.0);
 
     mu_assert_double_eq("1st step: pos.x != 0", obj.position.x, 0.0, 1e-15);
     mu_assert_double_eq("1st step: pos.y != 0", obj.position.y, 0.0, 1e-15);
@@ -116,7 +116,7 @@ static char *test_constant_force_second_step() {
         .force        = {4.0, 0.0, 0.0},
     };
 
-    step(&obj, 1.0);
+    object_step(&obj, 1.0);
 
     mu_assert_double_eq("2nd step: pos.x != 2", obj.position.x, 2.0, 1e-15);
     mu_assert_double_eq("2nd step: pos.y != 0", obj.position.y, 0.0, 1e-15);
@@ -140,7 +140,7 @@ static char *test_force_reset() {
         .force        = {3.0, 5.0, 7.0},
     };
 
-    step(&obj, 1.0);
+    object_step(&obj, 1.0);
 
     mu_assert_double_eq("force reset: force.x != 0", obj.force.x, 0.0, 1e-15);
     mu_assert_double_eq("force reset: force.y != 0", obj.force.y, 0.0, 1e-15);

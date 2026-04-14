@@ -30,10 +30,10 @@ void object_init(PhysicsObject *obj, double mass, double x, double y, double z) 
 }
 
 // TODO: Optimise to matrix math or parallelise for multi-object loops.
-void step(PhysicsObject *obj, double time_step) {
+void object_step(PhysicsObject *obj, double time_step) {
     // a_{t+dt} = F_net / m
     Vec3 next_a = vec3_div(obj->force, obj->mass);
-
+    
     // v_{t+dt} = v_t + ((a_t + a_{t+dt}) / 2) * dt
     Vec3 next_v = vec3_add(
         obj->velocity,

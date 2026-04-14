@@ -15,6 +15,7 @@ set(CMAKE_CUDA_ARCHITECTURES "native")
 
 enable_testing()
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Define subdirectories (modular libraries and main build target)
 set(SUBDIRECTORIES

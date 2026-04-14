@@ -380,5 +380,7 @@ void newtonian_gravity(const PhysicsObject *objects, int count,
         forces_out[i].z = sum_z_data[i];
     }
 
-    free(sum_x_data); free(sum_y_data); free(sum_z_data);
+    free(sum_x_data);
+    free(sum_y_data);
+    free(sum_z_data);
 }

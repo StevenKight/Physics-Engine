@@ -25,7 +25,7 @@ void sim_run(PhysicsObject *objects, int count, double time_step, int num_steps)
 
         // Advance each body one Velocity Verlet step; resets obj->force to zero.
         for (int i = 0; i < count; i++) {
-            step(&objects[i], time_step);
+            object_step(&objects[i], time_step);
         }
     }
 
