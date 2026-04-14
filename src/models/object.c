@@ -11,6 +11,19 @@
 
 void object_init(PhysicsObject *obj, double mass, double x, double y, double z) {
     obj->mass = mass;
+
+    obj->force.x = 0.0;
+    obj->force.y = 0.0;
+    obj->force.z = 0.0;
+    
+    obj->acceleration.x = 0.0;
+    obj->acceleration.y = 0.0;
+    obj->acceleration.z = 0.0;
+
+    obj->velocity.x = 0.0;
+    obj->velocity.y = 0.0;
+    obj->velocity.z = 0.0;
+    
     obj->position.x = x;
     obj->position.y = y;
     obj->position.z = z;
