@@ -56,6 +56,55 @@ ctest
 
 ---
 
+## Blender Addon
+
+The `blender/` directory contains a Blender addon that exposes the simulation through the Physics properties panel, allowing objects to be tagged as N-Body participants with their mass and initial velocity set directly in the UI.
+
+### Prerequisites
+
+- Blender 4.2 or later
+- The project cloned and built locally (see [Build](#build) above)
+
+### Installation
+
+**1. Build the addon zip**
+
+From the project root:
+
+```bash
+python3 -c "
+import zipfile
+files = [
+    ('blender/__init__.py',           'physics_engine/__init__.py'),
+    ('blender/preferences.py',        'physics_engine/preferences.py'),
+    ('blender/properties.py',         'physics_engine/properties.py'),
+    ('blender/panels.py',             'physics_engine/panels.py'),
+    ('blender/blender_manifest.toml', 'physics_engine/blender_manifest.toml'),
+]
+with zipfile.ZipFile('physics_engine.zip', 'w') as z:
+    for src, dst in files:
+        z.write(src, dst)
+"
+```
+
+**2. Install in Blender**
+
+- Open **Edit > Preferences > Get Extensions**
+- Click the dropdown arrow (top right) and select **Install from Disk**
+- Select `physics_engine.zip` from the project root
+
+**3. Configure the project root**
+
+- Go to **Edit > Preferences > Add-ons** and find **Physics Engine**
+- Set **Project Root** to the absolute path of this repository (e.g. `/home/user/Physics-Engine`)
+- This allows the addon to locate `interface/nbody.py` and the compiled library at runtime
+
+### Usage
+
+With the addon enabled, select any object and open the **Physics** tab in the Properties panel. An **N-Body** button will appear alongside the built-in physics types. Enabling it marks the object as an N-Body participant and exposes its **Mass** and **Initial Velocity** for use in simulation.
+
+---
+
 ## Roadmap
 
 - Optimized matrix operations replacing naive implementations
