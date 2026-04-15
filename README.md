@@ -42,16 +42,13 @@ The [Wiki](https://github.com/StevenKight/Physics-Engine/wiki) has derivations a
 ```bash
 git clone https://github.com/StevenKight/Physics-Engine.git
 cd Physics-Engine
-mkdir build && cd build
-cmake ..
 make
 ```
 
 ### Running Tests
 
 ```bash
-cd build
-ctest
+make test
 ```
 
 ---
@@ -72,19 +69,7 @@ The `blender/` directory contains a Blender addon that exposes the simulation th
 From the project root:
 
 ```bash
-python3 -c "
-import zipfile
-files = [
-    ('blender/__init__.py',           'physics_engine/__init__.py'),
-    ('blender/preferences.py',        'physics_engine/preferences.py'),
-    ('blender/properties.py',         'physics_engine/properties.py'),
-    ('blender/panels.py',             'physics_engine/panels.py'),
-    ('blender/blender_manifest.toml', 'physics_engine/blender_manifest.toml'),
-]
-with zipfile.ZipFile('physics_engine.zip', 'w') as z:
-    for src, dst in files:
-        z.write(src, dst)
-"
+make package
 ```
 
 **2. Install in Blender**
@@ -111,8 +96,7 @@ With the addon enabled, select any object and open the **Physics** tab in the Pr
 - Core rigid body mechanics
 - Benchmarking against existing engines
 - Soft-body dynamics and constraint systems
-- Mixed-precision arithmetic for GPU throughput
-- Rendering pipeline integration
+- Additional Rendering pipeline integrations
 
 ---
 

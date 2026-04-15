@@ -5,8 +5,7 @@
     "donjayamanne.githistory",
     "nvidia.cuda-toolkit",
     "fortran-lang.vscode-fortran-modern",
-    "streetsidesoftware.code-spell-checker",
-    "cschlosser.doxdocgen"
+    "ms-vscode.makefile-tools"
   ],
   "unwantedRecommendations": []
 }
