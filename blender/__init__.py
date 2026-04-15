@@ -2,10 +2,13 @@ import bpy
 from .preferences import PhysicsEnginePreferences
 from .properties import PhysicsEngineObjectProperties, PhysicsEngineSceneProperties
 from .panels import PHYSICS_ENGINE_PT_panel, draw_physics_add_button, draw_simulation_time_step
+from .operators import PHYSICS_ENGINE_OT_run, PHYSICS_ENGINE_OT_clear
 
 
 def register():
     bpy.utils.register_class(PhysicsEnginePreferences)
+    bpy.utils.register_class(PHYSICS_ENGINE_OT_run)
+    bpy.utils.register_class(PHYSICS_ENGINE_OT_clear)
     bpy.utils.register_class(PhysicsEngineSceneProperties)
     bpy.types.Scene.physics_engine = bpy.props.PointerProperty(
         type=PhysicsEngineSceneProperties
@@ -27,6 +30,8 @@ def unregister():
     bpy.utils.unregister_class(PhysicsEngineObjectProperties)
     del bpy.types.Scene.physics_engine
     bpy.utils.unregister_class(PhysicsEngineSceneProperties)
+    bpy.utils.unregister_class(PHYSICS_ENGINE_OT_clear)
+    bpy.utils.unregister_class(PHYSICS_ENGINE_OT_run)
     bpy.utils.unregister_class(PhysicsEnginePreferences)
 
 

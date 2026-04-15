@@ -3,11 +3,17 @@ from .preferences import load_interface
 
 
 def draw_simulation_time_step(self, context):
+    layout = self.layout
     props = context.scene.physics_engine
-    row = self.layout.row(align=True)
+
+    row = layout.row(align=True)
     row.enabled = context.scene.use_custom_simulation_range
     row.prop(props, "time_step_value")
     row.prop(props, "time_step_unit", text="")
+
+    row = layout.row(align=True)
+    row.operator("physics_engine.run", icon="PLAY")
+    row.operator("physics_engine.clear", icon="X")
 
 
 def draw_physics_add_button(self, context):
