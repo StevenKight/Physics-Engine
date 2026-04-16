@@ -16,12 +16,13 @@ C/C++ ties it all together and handles the core simulation logic.
 
 ## Current State
 
-- CMake build system configured for all three languages compiling together
+- CMake build system configured for all three languages compiling together; `Makefile` wraps common workflows (`build`, `test`, `package`, `clean`)
 - Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
 - `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_step`)
 - Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
 - Top-level `sim_run` simulation loop wiring force accumulation and object integration together
 - Python ctypes interface (`interface/nbody.py`) for driving simulations from Python without recompiling
+- Blender addon (`blender/`) integrating the simulation into Blender's physics system — bake N-body motion as keyframes directly from the Physics Properties panel
 - Unit test suite covering matrix operations, gravity calculations, and Velocity Verlet integration
 
 The [Wiki](https://github.com/StevenKight/Physics-Engine/wiki) has derivations and math notes as they get worked out.
@@ -87,6 +88,14 @@ make package
 ### Usage
 
 With the addon enabled, select any object and open the **Physics** tab in the Properties panel. An **N-Body** button will appear alongside the built-in physics types. Enabling it marks the object as an N-Body participant and exposes its **Mass** and **Initial Velocity** for use in simulation.
+
+---
+
+## Sample Scene
+
+`Sample - Solar System.blend` is a pre-built Blender scene demonstrating the addon with a solar system setup. Open it in Blender (with the addon installed and configured), hit **Run Simulation**, and the planets will animate under Newtonian gravity.
+
+Planet models by **FyorDev** on SketchFab — [Solar System (Real Scale, 2k Textures)](https://sketchfab.com/3d-models/solar-system-real-scale-2k-textures-febde2b6e3f64b06965620fd3ddc97c2), used for demonstration purposes.
 
 ---
 

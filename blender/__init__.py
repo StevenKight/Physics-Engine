@@ -1,3 +1,10 @@
+"""
+Blender addon entry point for the Physics Engine N-Body simulation integration.
+
+Registers all classes, properties, and UI extensions required by the addon,
+and cleans them up on unregister.
+"""
+
 import bpy
 from .preferences import PhysicsEnginePreferences
 from .properties import PhysicsEngineObjectProperties, PhysicsEngineSceneProperties
@@ -6,6 +13,7 @@ from .operators import PHYSICS_ENGINE_OT_run, PHYSICS_ENGINE_OT_clear
 
 
 def register():
+    """Register all addon classes and attach custom properties to Blender types."""
     bpy.utils.register_class(PhysicsEnginePreferences)
     bpy.utils.register_class(PHYSICS_ENGINE_OT_run)
     bpy.utils.register_class(PHYSICS_ENGINE_OT_clear)
@@ -23,6 +31,7 @@ def register():
 
 
 def unregister():
+    """Unregister all addon classes and remove custom properties from Blender types."""
     bpy.types.SCENE_PT_simulation.remove(draw_simulation_time_step)
     bpy.types.PHYSICS_PT_add.remove(draw_physics_add_button)
     bpy.utils.unregister_class(PHYSICS_ENGINE_PT_panel)
