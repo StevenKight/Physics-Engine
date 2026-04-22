@@ -20,10 +20,12 @@ C/C++ ties it all together and handles the core simulation logic.
 - Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
 - `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_step`)
 - Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
-- Top-level `sim_run` simulation loop wiring force accumulation and object integration together
-- Python ctypes interface (`interface/nbody.py`) for driving simulations from Python without recompiling
-- Blender addon (`blender/`) integrating the simulation into Blender's physics system — bake N-body motion as keyframes directly from the Physics Properties panel
-- Unit test suite covering matrix operations, gravity calculations, and Velocity Verlet integration
+- Two-phase collision detection: octree broad phase (AABB overlap) + SAT narrow phase (convex meshes; parallelised with OpenMP)
+- Inelastic collision response with configurable coefficient of restitution applied along the collision normal
+- Top-level `sim_run` simulation loop sequencing gravity, collision detection, collision response, and Velocity Verlet integration each tick
+- Python ctypes interface (`interface/nbody.py`) for driving simulations from Python; `PhysicsObject.set_mesh()` attaches convex geometry for collision detection
+- Blender addon (`blender/`) integrating the simulation into Blender's physics system — convex hulls are extracted automatically from object meshes and baked N-body motion is written as keyframes
+- Unit test suite covering matrix operations, gravity, AABB helpers, collision detection, inelastic response, and Velocity Verlet integration
 
 The [Wiki](https://github.com/StevenKight/Physics-Engine/wiki) has derivations and math notes as they get worked out.
 
@@ -93,9 +95,11 @@ With the addon enabled, select any object and open the **Physics** tab in the Pr
 
 ## Sample Scene
 
-`Sample - Solar System.blend` is a pre-built Blender scene demonstrating the addon with a solar system setup. Open it in Blender (with the addon installed and configured), hit **Run Simulation**, and the planets will animate under Newtonian gravity.
+Two sample scenes are included. Open either in Blender (with the addon installed and configured) and hit **Run Simulation**.
 
-Planet models by **FyorDev** on SketchFab — [Solar System (Real Scale, 2k Textures)](https://sketchfab.com/3d-models/solar-system-real-scale-2k-textures-febde2b6e3f64b06965620fd3ddc97c2), used for demonstration purposes.
+**`Sample - Solar System.blend`** — Newtonian N-body gravity with planetary orbits. Planet models by **FyorDev** on SketchFab — [Solar System (Real Scale, 2k Textures)](https://sketchfab.com/3d-models/solar-system-real-scale-2k-textures-febde2b6e3f64b06965620fd3ddc97c2), used for demonstration purposes.
+
+**`Sample - Collisions.blend`** — Demonstrates inelastic collision detection and response between objects with convex mesh geometry.
 
 ---
 

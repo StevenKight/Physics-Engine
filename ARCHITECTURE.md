@@ -27,8 +27,20 @@ Physics-Engine/
 │   └── package_blender.py
 ├── src/
 │   ├── logic/
+│   │   ├── collision/
+│   │   │   ├── CMakeLists.txt
+│   │   │   ├── aabb.c
+│   │   │   ├── aabb.h
+│   │   │   ├── collision.c
+│   │   │   ├── collision.h
+│   │   │   ├── octree.c
+│   │   │   ├── octree.h
+│   │   │   ├── sat.c
+│   │   │   └── sat.h
 │   │   ├── forces/
 │   │   │   ├── CMakeLists.txt
+│   │   │   ├── collision.c
+│   │   │   ├── collision.h
 │   │   │   ├── gravity.c
 │   │   │   └── gravity.h
 │   │   ├── CMakeLists.txt
@@ -75,6 +87,9 @@ Physics-Engine/
 │   │   ├── minunit.h
 │   │   └── test_runner.h
 │   ├── logic/
+│   │   ├── test_aabb.c
+│   │   ├── test_collision.c
+│   │   ├── test_inelastic_collision.c
 │   │   └── test_newtonian_gravity.c
 │   ├── math/
 │   │   ├── test_matrix_add.c
@@ -94,6 +109,7 @@ Physics-Engine/
 ├── LICENSE
 ├── Makefile
 ├── README.md
+├── Sample - Collisions.blend
 └── Sample - Solar System.blend
 ```
 
@@ -104,31 +120,38 @@ Directory Overview
     - `math/`: Backend-agnostic matrix operation API. `matrix.h` and `matrix.c` expose a unified interface; each operation accepts a `use_gpu` flag that routes the call to either the `cuda/` or `fortran/` backend at runtime. Also contains `vec3.h`/`vec3.c`, a lightweight 3D double-precision vector type used throughout the engine.
         - `math/cuda/`: CUDA kernels for GPU-accelerated matrix operations. Implements addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, and row/column summing. Uses row-major double-precision storage.
         - `math/fortran/`: Fortran implementations of the same matrix operations for CPU execution. Uses column-major double-precision arrays; tight-loop structure lets the Fortran compiler apply aggressive optimisations without GPU dispatch overhead.
-    - `logic/`: Physics calculations built on top of the math layer. Contains `sim.c`/`sim.h`, which drives the top-level N-body simulation loop (`sim_run`): each tick accumulates forces on all objects, then advances each object via Velocity Verlet integration.
-        - `logic/forces/`: Force implementations. Currently contains Newtonian N-body gravity (`gravity.c`/`gravity.h`), which decomposes force computation into matrix operations and delegates to the appropriate backend based on problem size.
-    - `models/`: Data structures for simulation objects. `object.h`/`object.c` define `PhysicsObject` (mass, position, velocity, acceleration, force — all using `Vec3`) and `object_step()`, which advances an object by one Velocity Verlet step and resets its accumulated force.
+    - `logic/`: Physics calculations built on top of the math layer. Contains `sim.c`/`sim.h`, which drives the top-level N-body simulation loop (`sim_run`): each tick accumulates gravitational forces, runs collision detection, applies collision response, then advances each object via Velocity Verlet integration.
+        - `logic/collision/`: Two-phase collision detection pipeline. `collision.h`/`collision.c` expose the single entry point `collision_detect()`, which sequences an octree broad phase followed by SAT narrow phase and writes confirmed colliding index pairs to a caller-allocated buffer. Convex meshes only — non-convex geometry produces undefined results.
+            - `aabb.h`/`aabb.c`: Axis-aligned bounding box helpers — compute a world-space AABB from a `PhysicsObject`'s mesh, test pair overlap, and split a box into 8 equal octants.
+            - `octree.h`/`octree.c`: Integer-indexed node-pool octree for broad-phase detection. The entire tree lives in a flat `OctreePool` array (no dynamic allocation, no interior pointers), making it straightforward to upload to GPU memory in the future. Objects are inserted into every overlapping leaf; candidate pairs are collected by iterating leaves.
+            - `sat.h`/`sat.c`: SAT narrow-phase. Tests face normals of both objects plus all edge×edge cross-product axes. Parallelised with OpenMP (`#pragma omp parallel for`) when available.
+        - `logic/forces/`: Force and impulse implementations.
+            - `gravity.c`/`gravity.h`: Newtonian N-body gravity, decomposed into matrix operations and routed to Fortran or CUDA based on body count.
+            - `collision.c`/`collision.h`: Inelastic collision response (`inelastic_collision()`). Projects velocities onto the centre-to-centre normal, applies the 1D inelastic formula with a caller-supplied coefficient of restitution, and updates velocities in place. Tangential components are unchanged.
+    - `models/`: Data structures for simulation objects. `object.h`/`object.c` define `PhysicsObject` (mass, position, velocity, acceleration, force — all using `Vec3` — plus an optional convex mesh: up to `PHYS_MAX_VERTICES=64` local-space vertices and `PHYS_MAX_FACES=32` triangular faces) and `object_step()`, which advances an object by one Velocity Verlet step and resets its accumulated force. Objects with `vertex_count == 0` are treated as point masses and bypass collision detection.
     - `main.cpp`: Entry point. Orchestrates the simulation and exercises the engine's subsystems.
 - `blender/`: Blender addon that integrates the N-body simulation into Blender's physics system.
     - `__init__.py`: Addon entry point. Registers all classes, property groups, and UI extensions on load and cleans them up on unregister.
-    - `operators.py`: Two operators — `PHYSICS_ENGINE_OT_run` bakes the simulation frame-by-frame and inserts location keyframes on every N-body object; `PHYSICS_ENGINE_OT_clear` removes those keyframes and restores each object to its pre-bake position.
+    - `operators.py`: Two operators — `PHYSICS_ENGINE_OT_run` bakes the simulation frame-by-frame and inserts location keyframes on every N-body object (it also extracts each object's convex hull via `_get_convex_hull` and attaches it to the `PhysicsObject` for collision detection); `PHYSICS_ENGINE_OT_clear` removes those keyframes and restores each object to its pre-bake position.
     - `panels.py`: UI panels and draw callbacks that expose simulation controls in Blender's Physics Properties and Scene panels.
     - `preferences.py`: Addon preferences panel. Stores the path to the Physics Engine project root and provides `load_interface()`, which dynamically imports `PhysicsObject` and `sim_run` from `interface.nbody` at runtime.
     - `properties.py`: `PhysicsEngineSceneProperties` (time-step setting, stored on `bpy.types.Scene`) and `PhysicsEngineObjectProperties` (per-object mass, initial velocity, and N-body enable flag stored on `bpy.types.Object`). Enabling an object automatically strips conflicting Blender physics systems.
     - `blender_manifest.toml`: Blender Extension manifest declaring addon metadata.
 - `interface/`: Language bindings for the compiled shared library.
-    - `interface/nbody.py`: Python ctypes interface. Mirrors the `Vec3` and `PhysicsObject` C structs and exposes `sim_run()` so simulations can be driven from Python without recompiling.
+    - `interface/nbody.py`: Python ctypes interface. Mirrors the `Vec3` and `PhysicsObject` C structs (including mesh geometry fields) and exposes `sim_run()`. `PhysicsObject.set_mesh()` attaches a convex mesh for collision detection; objects without a mesh are point masses.
 - `scripts/`: Utility scripts for development and packaging.
     - `scripts/package_blender.py`: Packages the `blender/` directory into `physics_engine.zip` for Blender Extension installation. Invoked via `make package`.
 - `test/`: Unit tests mirroring the `src/` module structure.
     - `test/framework/`: Minimal test utilities (`minunit.h`, `test_runner.h`) used across all tests.
     - `test/math/`: Tests for each matrix operation, verifying both CPU and GPU backends.
-    - `test/logic/`: Tests for physics calculations, including multi-body gravity scenarios.
+    - `test/logic/`: Tests for physics calculations, including multi-body gravity, AABB helpers, full collision detection pipeline, and inelastic collision response.
     - `test/models/`: Tests for simulation object behaviour, including Velocity Verlet integration correctness.
 - `data/`: Directory for simulation data files (initial conditions, scene definitions).
 - `docs/`: Project wiki submodule. Contains mathematical derivations, algorithm notes, and design rationale as they are worked out.
 - `.vscode/`: VS Code workspace settings for a consistent development environment.
 - `CMakeLists.txt`: Root CMake script configuring the multi-language build (C, C++, Fortran, CUDA).
 - `Makefile`: Convenience wrapper exposing `build`, `test`, `package`, `clean`, and `help` targets so common workflows don't require remembering raw CMake or Python invocations.
+- `Sample - Collisions.blend`: Pre-built Blender scene demonstrating inelastic collision detection and response.
 - `Sample - Solar System.blend`: Pre-built Blender scene demonstrating the addon with a solar system setup. Planet models by FyorDev on SketchFab.
 - `.clang-format`: LLVM-style formatting rules enforced across C/C++ code.
 
