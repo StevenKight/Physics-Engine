@@ -29,7 +29,6 @@ void object_init(PhysicsObject *obj, double mass, double x, double y, double z) 
     obj->position.z = z;
 }
 
-// TODO: Optimise to matrix math or parallelise for multi-object loops.
 void object_step(PhysicsObject *obj, double time_step) {
     // a_{t+dt} = F_net / m
     Vec3 next_a = vec3_div(obj->force, obj->mass);

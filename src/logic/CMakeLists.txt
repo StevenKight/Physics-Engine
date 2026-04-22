@@ -15,6 +15,7 @@ target_link_libraries(logic_lib PUBLIC
     math_lib
     models_lib
     forces_lib
+    OpenMP::OpenMP_C
 )
 
 # Shared library for Python ctypes bindings.
@@ -38,6 +39,7 @@ target_link_libraries(nbody_sim PUBLIC
     math_lib
     models_lib
     forces_lib
+    OpenMP::OpenMP_C
 )
 
 # Explicitly add Fortran and CUDA runtime dynamic deps.

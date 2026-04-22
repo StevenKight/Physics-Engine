@@ -142,7 +142,8 @@ static void compute_displacements(const PhysicsObject *objects, int count, bool 
  *                   force magnitude between every pair of bodies.
  * @param use_gpu    If true, use the CUDA backend; otherwise Fortran.
  */
-void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *force_data, bool use_gpu) {
+static void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *force_data, bool use_gpu,
+                                     const double *dx_data, const double *dy_data, const double *dz_data) {
 
     // ── Step 1: mass product  m_n × m_n^T  (N×N) ────────────────────────────
     // Produces mass_prod[i,j] = m_i * m_j for every body pair.
@@ -166,17 +167,13 @@ void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *f
     free(row_data);
 
     // ── Step 2: squared distances  r²[i,j] = Δx² + Δy² + Δz²  (N×N) ────────
-    // Sign of ΔX/ΔY/ΔZ doesn't matter here since everything is squared.
-    double *dx_data, *dy_data, *dz_data;
-    compute_displacements(objects, count, use_gpu, &dx_data, &dy_data, &dz_data);
-
     double *dx_s_data = calloc(count * count, sizeof(double));
     double *dy_s_data = calloc(count * count, sizeof(double));
     double *dz_s_data = calloc(count * count, sizeof(double));
 
-    Matrix dx = { count, count, dx_data };
-    Matrix dy = { count, count, dy_data };
-    Matrix dz = { count, count, dz_data };
+    Matrix dx = { count, count, (double *)dx_data };
+    Matrix dy = { count, count, (double *)dy_data };
+    Matrix dz = { count, count, (double *)dz_data };
     Matrix dx_s = { count, count, dx_s_data };
     Matrix dy_s = { count, count, dy_s_data };
     Matrix dz_s = { count, count, dz_s_data };
@@ -194,7 +191,6 @@ void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *f
     matrix_add(&dx_s, &dy_s, &xy_dist, use_gpu);
     matrix_add(&xy_dist, &dz_s, &distances, use_gpu);
 
-    free(dx_data);   free(dy_data);   free(dz_data);
     free(dx_s_data); free(dy_s_data); free(dz_s_data);
     free(xy_dist_data);
 
@@ -253,21 +249,17 @@ void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *f
  *                   that will receive the unit direction vectors.
  * @param use_gpu    If true, use the CUDA backend; otherwise Fortran.
  */
-void newtonian_gravity_directions(const PhysicsObject *objects, int count, Matrix3 *directions, bool use_gpu) {
+static void newtonian_gravity_directions(int count, Matrix3 *directions, bool use_gpu,
+                                         const double *dx_data, const double *dy_data, const double *dz_data) {
 
-    // ── Step 1: displacement components  ΔX, ΔY, ΔZ  (N×N) ─────────────────
-    // ΔX[i,j] = x_j - x_i  (points from body i toward body j)
-    double *dx_data, *dy_data, *dz_data;
-    compute_displacements(objects, count, use_gpu, &dx_data, &dy_data, &dz_data);
-
-    // ── Step 2: squared distances  r²[i,j] = ΔX² + ΔY² + ΔZ²  (N×N) ───────
+    // ── Step 1: squared distances  r²[i,j] = ΔX² + ΔY² + ΔZ²  (N×N) ───────
     double *dx_s_data = calloc(count * count, sizeof(double));
     double *dy_s_data = calloc(count * count, sizeof(double));
     double *dz_s_data = calloc(count * count, sizeof(double));
 
-    Matrix dx = { count, count, dx_data };
-    Matrix dy = { count, count, dy_data };
-    Matrix dz = { count, count, dz_data };
+    Matrix dx = { count, count, (double *)dx_data };
+    Matrix dy = { count, count, (double *)dy_data };
+    Matrix dz = { count, count, (double *)dz_data };
     Matrix dx_s = { count, count, dx_s_data };
     Matrix dy_s = { count, count, dy_s_data };
     Matrix dz_s = { count, count, dz_s_data };
@@ -315,7 +307,6 @@ void newtonian_gravity_directions(const PhysicsObject *objects, int count, Matri
     matrix_div(&dy, &r_mat, &directions->y, use_gpu);
     matrix_div(&dz, &r_mat, &directions->z, use_gpu);
 
-    free(dx_data); free(dy_data); free(dz_data);
     free(r_data);
 }
 
@@ -324,9 +315,13 @@ void newtonian_gravity(const PhysicsObject *objects, int count,
 
     const bool use_gpu = gravity_use_gpu(count);
 
+    // ── Shared: displacement matrices ΔX, ΔY, ΔZ used by both stages ─────────
+    double *dx_data, *dy_data, *dz_data;
+    compute_displacements(objects, count, use_gpu, &dx_data, &dy_data, &dz_data);
+
     // ── Stage 1: scalar force magnitudes  F[i,j]  (N×N) ─────────────────────
     double *force_data = calloc(count * count, sizeof(double));
-    newtonian_gravity_forces(objects, count, force_data, use_gpu);
+    newtonian_gravity_forces(objects, count, force_data, use_gpu, dx_data, dy_data, dz_data);
 
     // ── Stage 2: unit direction tensor  D_hat[i,j]  (N×N×3) ─────────────────
     double *dir_x_data = calloc(count * count, sizeof(double));
@@ -339,7 +334,8 @@ void newtonian_gravity(const PhysicsObject *objects, int count,
         .z = { count, count, dir_z_data },
     };
 
-    newtonian_gravity_directions(objects, count, &directions, use_gpu);
+    newtonian_gravity_directions(count, &directions, use_gpu, dx_data, dy_data, dz_data);
+    free(dx_data); free(dy_data); free(dz_data);
 
     // ── Stage 3: F_vec[i,j] = F[i,j] ⊙ D_hat[i,j]  (Hadamard per component) ─
     Matrix forces = { count, count, force_data };

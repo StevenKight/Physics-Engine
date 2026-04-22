@@ -12,6 +12,7 @@
 #include "../models/object.h"
 
 #include <stdlib.h>
+#include <omp.h>
 
 void sim_run(PhysicsObject *objects, int count, double time_step, int num_steps) {
     Vec3 *forces = malloc(count * sizeof(Vec3));
@@ -19,11 +20,13 @@ void sim_run(PhysicsObject *objects, int count, double time_step, int num_steps)
     for (int tick = 0; tick < num_steps; tick++) {
         // Compute net gravitational force on each body and accumulate into obj->force.
         newtonian_gravity(objects, count, forces);
+
         for (int i = 0; i < count; i++) {
             objects[i].force = forces[i];
         }
 
         // Advance each body one Velocity Verlet step; resets obj->force to zero.
+        #pragma omp parallel for schedule(static)
         for (int i = 0; i < count; i++) {
             object_step(&objects[i], time_step);
         }
