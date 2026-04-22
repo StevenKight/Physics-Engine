@@ -10,7 +10,65 @@ Provides two operators:
 """
 
 import bpy
+import bmesh
 from .preferences import load_interface
+
+
+def _get_convex_hull(obj, operator):
+    """
+    Compute the convex hull of obj's mesh in local space with scale applied.
+
+    CONVEX GEOMETRY ONLY: the hull is passed to a SAT-based collision pipeline
+    that is only correct for convex meshes. This function ensures that guarantee
+    by always computing the hull rather than using the raw mesh.
+
+    Returns:
+        (vertices, faces) where vertices is a list of (x, y, z) tuples in local
+        space and faces is a list of (i0, i1, i2) index triples (CCW winding).
+        Returns (None, None) if obj has no mesh data or the hull exceeds the
+        simulation's geometry limits (64 vertices / 32 triangular faces).
+    """
+    if obj.type != 'MESH' or not obj.data or not obj.data.vertices:
+        return None, None
+
+    bm = bmesh.new()
+    try:
+        bm.from_mesh(obj.data)
+        result = bmesh.ops.convex_hull(bm, input=bm.verts)
+        hull_faces = [g for g in result['geom'] if isinstance(g, bmesh.types.BMFace)]
+
+        if not hull_faces:
+            return None, None
+
+        scale    = obj.scale
+        vertices = []
+        vert_map = {}   # id(BMVert) → index in vertices list
+        tri_faces = []
+
+        for face in hull_faces:
+            indices = []
+            for v in face.verts:
+                key = id(v)
+                if key not in vert_map:
+                    vert_map[key] = len(vertices)
+                    co = v.co
+                    vertices.append((co.x * scale.x, co.y * scale.y, co.z * scale.z))
+                indices.append(vert_map[key])
+            # Fan-triangulate the hull face (convex hull faces may be n-gons).
+            for i in range(1, len(indices) - 1):
+                tri_faces.append((indices[0], indices[i], indices[i + 1]))
+    finally:
+        bm.free()
+
+    if len(vertices) > 64 or len(tri_faces) > 32:
+        operator.report(
+            {'WARNING'},
+            f"{obj.name}: convex hull has {len(vertices)} vertices / "
+            f"{len(tri_faces)} faces (limits: 64 / 32). Collision mesh skipped.",
+        )
+        return None, None
+
+    return vertices, tri_faces
 
 
 _TIME_STEP_MULTIPLIERS = {
@@ -90,7 +148,7 @@ class PHYSICS_ENGINE_OT_run(bpy.types.Operator):
         for obj in objects:
             obj["pe_initial_location"] = tuple(obj.location)
 
-            sim_objects.append(PhysicsObject(
+            sim_obj = PhysicsObject(
                 mass=obj.physics_engine.mass,
                 x=obj.location.x,
                 y=obj.location.y,
@@ -98,7 +156,11 @@ class PHYSICS_ENGINE_OT_run(bpy.types.Operator):
                 vx=obj.physics_engine.velocity[0],
                 vy=obj.physics_engine.velocity[1],
                 vz=obj.physics_engine.velocity[2],
-            ))
+            )
+            verts, faces = _get_convex_hull(obj, self)
+            if verts is not None and faces is not None:
+                sim_obj.set_mesh(verts, faces)
+            sim_objects.append(sim_obj)
 
         # Insert the initial keyframe at the start frame before advancing.
         for obj in objects:

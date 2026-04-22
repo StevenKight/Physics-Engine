@@ -22,11 +22,12 @@ extern "C" {
 /**
  * @brief Run the simulation for a fixed number of time steps.
  *
- * Each tick:
- *   1. Computes the net force on every body and accumulates it
- *      into each object's @c force field.
- *   2. Calls step() on every object to advance position, velocity, and
- *      acceleration via Velocity Verlet integration and reset @c force to zero.
+ * Runs gravity, collision detection (internally — pairs are not exposed to the
+ * caller), and Velocity Verlet integration each tick.
+ *
+ * Objects that have vertex/face geometry (vertex_count > 0) participate in
+ * collision detection automatically. Objects without geometry are point masses
+ * for gravity only.
  *
  * @param objects    Pointer to an array of PhysicsObject. Must not be NULL.
  * @param count      Number of objects (N).
@@ -35,6 +36,7 @@ extern "C" {
  */
 void sim_run(PhysicsObject *objects, int count, double time_step,
              int num_steps);
+
 
 #ifdef __cplusplus
 }

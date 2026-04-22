@@ -22,6 +22,9 @@ import ctypes
 import ctypes.util
 from pathlib import Path
 
+PHYS_MAX_VERTICES = 64
+PHYS_MAX_FACES    = 32
+
 
 def _preload_cuda() -> None:
     # libnbody_sim.so embeds CUDA device code whose __cudaRegisterFatBinary
@@ -77,6 +80,14 @@ class PhysicsObject(ctypes.Structure):
         ("velocity",     Vec3),
         ("acceleration", Vec3),
         ("force",        Vec3),
+        # Convex mesh geometry (local space, centred at origin).
+        # _pad fields match compiler alignment of Vec3 after int fields.
+        ("vertex_count", ctypes.c_int),
+        ("_pad0",        ctypes.c_int),
+        ("local_verts",  Vec3 * PHYS_MAX_VERTICES),
+        ("face_count",   ctypes.c_int),
+        ("_pad1",        ctypes.c_int),
+        ("face_indices", (ctypes.c_int * 3) * PHYS_MAX_FACES),
     ]
 
     def __init__(
@@ -91,6 +102,38 @@ class PhysicsObject(ctypes.Structure):
         self.velocity     = Vec3(vx, vy, vz)
         self.acceleration = Vec3(0.0, 0.0, 0.0)
         self.force        = Vec3(0.0, 0.0, 0.0)
+
+    def set_mesh(
+        self,
+        vertices: list[tuple[float, float, float]],
+        faces:    list[tuple[int, int, int]],
+    ) -> None:
+        """
+        Attach convex mesh geometry in local space (centred at origin).
+
+        CONVEX GEOMETRY ONLY: collision detection uses the Separating Axis
+        Theorem, which is only correct for convex meshes. Concave objects must
+        be reduced to their convex hull before calling this method. Passing
+        concave geometry will produce missed collisions without any error.
+
+        Args:
+            vertices: List of (x, y, z) tuples — local-space vertex positions.
+            faces:    List of (i0, i1, i2) index triples, CCW winding outward.
+        """
+        if len(vertices) > PHYS_MAX_VERTICES:
+            raise ValueError(f"Too many vertices: {len(vertices)} > {PHYS_MAX_VERTICES}")
+        if len(faces) > PHYS_MAX_FACES:
+            raise ValueError(f"Too many faces: {len(faces)} > {PHYS_MAX_FACES}")
+
+        self.vertex_count = len(vertices)
+        for i, (x, y, z) in enumerate(vertices):
+            self.local_verts[i] = Vec3(x, y, z)
+
+        self.face_count = len(faces)
+        for i, (i0, i1, i2) in enumerate(faces):
+            self.face_indices[i][0] = i0
+            self.face_indices[i][1] = i1
+            self.face_indices[i][2] = i2
 
     def __repr__(self) -> str:
         return (

@@ -1,4 +1,5 @@
 add_subdirectory(forces)
+add_subdirectory(collision)
 
 file(GLOB LOGIC_SOURCES "*.c")
 
@@ -15,6 +16,7 @@ target_link_libraries(logic_lib PUBLIC
     math_lib
     models_lib
     forces_lib
+    collision_lib
     OpenMP::OpenMP_C
 )
 
@@ -39,6 +41,7 @@ target_link_libraries(nbody_sim PUBLIC
     math_lib
     models_lib
     forces_lib
+    collision_lib
     OpenMP::OpenMP_C
 )
 
