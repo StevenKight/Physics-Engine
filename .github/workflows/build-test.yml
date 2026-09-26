@@ -24,8 +24,13 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             nvidia-cuda-toolkit gfortran cmake
 
+      # An explicit architecture list, not the "all-major" keyword: resolving
+      # that keyword during CMake's initial CUDA compiler-ID probe depends on
+      # the CMake version, and older CMake (e.g. Ubuntu 22.04's packaged 3.22)
+      # emits an empty -gencode flag and fails before a device would even
+      # matter. A concrete list works identically across CMake versions.
       - name: Configure
-        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES=all-major
+        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;90"
 
       - name: Build
         run: cmake --build build -j"$(nproc)"
