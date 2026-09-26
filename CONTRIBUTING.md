@@ -32,6 +32,8 @@ How to Contribute
         clang-tidy -p build src/path/to/changed_file.c
 
     `.editorconfig` sets baseline indentation/whitespace per language (most editors pick this up automatically with no plugin needed for basic settings).
+
+    Installing the hooks locally is not enforced by git itself — `.git/hooks/` isn't tracked, so a fresh clone won't have them until you run `pre-commit install`. As a backstop, `.github/workflows/pre-commit.yml` reruns the same checks in CI on every push and pull request, so an unformatted change will still be caught even if the local hook was skipped.
 5.  Submit a **pull request** and clearly explain:
     *   What the contribution does
     *   Why it's useful
