@@ -1,5 +1,9 @@
 # High-Performance Physics Engine
 
+[![pre-commit](https://github.com/StevenKight/Physics-Engine/actions/workflows/pre-commit.yml/badge.svg?branch=main)](https://github.com/StevenKight/Physics-Engine/actions/workflows/pre-commit.yml)
+[![build-and-test](https://github.com/StevenKight/Physics-Engine/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/StevenKight/Physics-Engine/actions/workflows/build-test.yml)
+[![cuda-compile-check](https://github.com/StevenKight/Physics-Engine/actions/workflows/cuda-compile.yml/badge.svg?branch=main)](https://github.com/StevenKight/Physics-Engine/actions/workflows/cuda-compile.yml)
+
 A research project building a physics simulation engine using C/C++, Fortran, and CUDA. The goal is rigid body mechanics simulation with computation routed to whatever hardware makes the most sense for the job.
 
 The short version: CUDA handles the big parallel workloads, Fortran handles small tight-loop numerical operations where it genuinely outperforms the alternatives, and C++ manages everything in between. Getting all three to compile together through CMake was its own adventure.
