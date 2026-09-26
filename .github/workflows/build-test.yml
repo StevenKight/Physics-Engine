@@ -7,7 +7,11 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    # Pinned rather than ubuntu-latest: that label has already moved once
+    # this year (22.04 -> 24.04), silently changing every apt-sourced
+    # toolchain version underneath this job. Bumping it is now a deliberate,
+    # visible diff instead of a surprise.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -18,19 +22,37 @@ jobs:
       # actually runs here — see cuda-compile.yml for the dedicated CUDA
       # compile check and README/CONTRIBUTING for why the math tests skip
       # their GPU half in this environment.
+      #
+      # gcc-12/g++-12/gfortran-12 named explicitly: without a version suffix,
+      # nvcc silently picks whichever GCC happens to be preinstalled on the
+      # runner image's toolcache (observed as GNU 12.4.0 on one run, with no
+      # apt log entry explaining why) — the exact version was never actually
+      # chosen by us. CUDA 12.0's nvcc also doesn't support ubuntu-24.04's
+      # default gcc-13 as a host compiler, so this pin isn't arbitrary.
       - name: Install toolchain
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            nvidia-cuda-toolkit gfortran cmake
+            nvidia-cuda-toolkit cmake gcc-12 g++-12 gfortran-12
 
       # An explicit architecture list, not the "all-major" keyword: resolving
       # that keyword during CMake's initial CUDA compiler-ID probe depends on
       # the CMake version, and older CMake (e.g. Ubuntu 22.04's packaged 3.22)
       # emits an empty -gencode flag and fails before a device would even
       # matter. A concrete list works identically across CMake versions.
+      #
+      # CMAKE_CUDA_HOST_COMPILER must be the C++ compiler (g++), not gcc —
+      # nvcc needs the C++ frontend since the .cu sources use <iostream>;
+      # passing the C compiler here fails at link time with undefined std::
+      # symbols instead of a clear configure-time error.
       - name: Configure
-        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;90"
+        run: |
+          cmake -B build \
+            -DCMAKE_C_COMPILER=gcc-12 \
+            -DCMAKE_CXX_COMPILER=g++-12 \
+            -DCMAKE_Fortran_COMPILER=gfortran-12 \
+            -DCMAKE_CUDA_HOST_COMPILER=g++-12 \
+            -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;90"
 
       - name: Build
         run: cmake --build build -j"$(nproc)"

@@ -19,8 +19,12 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      # gcc-11/g++-11/gfortran-11 named explicitly to match this image's
+      # native default (rather than the generic build-essential/gfortran
+      # metapackages) so the pin is visible here rather than implicit in
+      # whatever ubuntu-22.04 currently defaults to.
       - name: Install toolchain
-        run: apt-get install -y --no-install-recommends cmake gfortran build-essential
+        run: apt-get install -y --no-install-recommends cmake gcc-11 g++-11 gfortran-11
 
       # Compile-only: the container has nvcc but no GPU, so we configure and
       # build (verifying every CUDA translation unit compiles/links) without
@@ -30,8 +34,17 @@ jobs:
       # that keyword during CMake's initial CUDA compiler-ID probe depends on
       # the CMake version, and this container's packaged CMake (3.22) emits
       # an empty -gencode flag and fails before a device would even matter.
+      #
+      # CMAKE_CUDA_HOST_COMPILER must be the C++ compiler (g++), not gcc —
+      # see build-test.yml for why.
       - name: Configure
-        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;90"
+        run: |
+          cmake -B build \
+            -DCMAKE_C_COMPILER=gcc-11 \
+            -DCMAKE_CXX_COMPILER=g++-11 \
+            -DCMAKE_Fortran_COMPILER=gfortran-11 \
+            -DCMAKE_CUDA_HOST_COMPILER=g++-11 \
+            -DCMAKE_CUDA_ARCHITECTURES="70;75;80;86;90"
 
       - name: Build
         run: cmake --build build -j"$(nproc)"
