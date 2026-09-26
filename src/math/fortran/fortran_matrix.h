@@ -113,12 +113,14 @@ void matrix_scalar_sub_f(const double *A, const double *scalar, double *C,
 /**
  * @brief Element-wise power: C[i,j] = A[i,j]^power
  * @param A     Pointer to input matrix A (double*), dimensions n x m
- * @param power Pointer to the exponent (double*). Passed by address for Fortran ABI.
+ * @param power Pointer to the exponent (double*). Passed by address for Fortran
+ * ABI.
  * @param C     Pointer to output matrix storage (double*), dimensions n x m
  * @param n     Pointer to number of rows
  * @param m     Pointer to number of columns
  */
-void matrix_power_f(const double *A, const double *power, double *C, const int *n, const int *m);
+void matrix_power_f(const double *A, const double *power, double *C,
+                    const int *n, const int *m);
 
 /**
  * @brief Element-wise division: C = A / B
@@ -130,7 +132,8 @@ void matrix_power_f(const double *A, const double *power, double *C, const int *
  *
  * @note No division-by-zero checks are performed in the Fortran implementation.
  */
-void matrix_div_f(const double *A, const double *B, double *C, const int *n, const int *m);
+void matrix_div_f(const double *A, const double *B, double *C, const int *n,
+                  const int *m);
 
 /**
  * @brief Sum each row into a column vector: R[i] = sum_j A[i,j]
@@ -158,7 +161,8 @@ void matrix_col_sum_f(const double *A, double *R, const int *n, const int *m);
  * @param n Pointer to number of rows
  * @param m Pointer to number of columns
  */
-void matrix_hadamard_f(const double *A, const double *B, double *C, const int *n, const int *m);
+void matrix_hadamard_f(const double *A, const double *B, double *C,
+                       const int *n, const int *m);
 
 #ifdef __cplusplus
 }

@@ -93,7 +93,8 @@ void matrix_scalar_divide_cuda(const Matrix *matrix, double scalar,
  * @param scalar Scalar to add
  * @param result Pointer to output matrix (host memory, row-major)
  */
-void matrix_scalar_add_cuda(const Matrix *matrix, double scalar, Matrix *result);
+void matrix_scalar_add_cuda(const Matrix *matrix, double scalar,
+                            Matrix *result);
 
 /**
  * @brief Element-wise scalar subtraction: result = matrix - scalar
@@ -144,7 +145,8 @@ void matrix_col_sum_cuda(const Matrix *a, Matrix *result);
  * @brief Element-wise multiplication (Hadamard product): result = a * b
  * @param a      Pointer to the first input matrix (host memory, row-major)
  * @param b      Pointer to the second input matrix (host memory, row-major)
- * @param result Pointer to output matrix; must be pre-allocated with same dimensions as A and B
+ * @param result Pointer to output matrix; must be pre-allocated with same
+ * dimensions as A and B
  */
 void matrix_hadamard_cuda(const Matrix *a, const Matrix *b, Matrix *result);
 

@@ -19,22 +19,21 @@
 
 #include "forces/collision.h"
 #include "test_runner.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                               */
 /* ------------------------------------------------------------------ */
 
-static PhysicsObject make_obj(double mass,
-                               double px, double py, double pz,
-                               double vx, double vy, double vz) {
+static PhysicsObject make_obj(double mass, double px, double py, double pz,
+                              double vx, double vy, double vz) {
     PhysicsObject obj;
     memset(&obj, 0, sizeof(obj));
-    obj.mass     = mass;
-    obj.position = (Vec3){ px, py, pz };
-    obj.velocity = (Vec3){ vx, vy, vz };
-    obj.force    = (Vec3){ 0.0, 0.0, 0.0 };
+    obj.mass = mass;
+    obj.position = (Vec3){px, py, pz};
+    obj.velocity = (Vec3){vx, vy, vz};
+    obj.force = (Vec3){0.0, 0.0, 0.0};
     return obj;
 }
 
@@ -47,21 +46,21 @@ static PhysicsObject make_obj(double mass,
  *   ua=+1, ub=-1  →  va=-1, vb=+1
  */
 static char *test_elastic_equal_mass() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0,  1.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0, -1.0,0.0,0.0);
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0);
 
     inelastic_collision(&a, &b, 1.0);
 
-    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n",
-           a.velocity.x, a.velocity.y, a.velocity.z,
-           b.velocity.x, b.velocity.y, b.velocity.z);
+    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n", a.velocity.x,
+           a.velocity.y, a.velocity.z, b.velocity.x, b.velocity.y,
+           b.velocity.z);
 
     mu_assert_double_eq("elastic: v_a.x != -1", a.velocity.x, -1.0, 1e-10);
-    mu_assert_double_eq("elastic: v_a.y != 0",  a.velocity.y,  0.0, 1e-10);
-    mu_assert_double_eq("elastic: v_a.z != 0",  a.velocity.z,  0.0, 1e-10);
-    mu_assert_double_eq("elastic: v_b.x != +1", b.velocity.x,  1.0, 1e-10);
-    mu_assert_double_eq("elastic: v_b.y != 0",  b.velocity.y,  0.0, 1e-10);
-    mu_assert_double_eq("elastic: v_b.z != 0",  b.velocity.z,  0.0, 1e-10);
+    mu_assert_double_eq("elastic: v_a.y != 0", a.velocity.y, 0.0, 1e-10);
+    mu_assert_double_eq("elastic: v_a.z != 0", a.velocity.z, 0.0, 1e-10);
+    mu_assert_double_eq("elastic: v_b.x != +1", b.velocity.x, 1.0, 1e-10);
+    mu_assert_double_eq("elastic: v_b.y != 0", b.velocity.y, 0.0, 1e-10);
+    mu_assert_double_eq("elastic: v_b.z != 0", b.velocity.z, 0.0, 1e-10);
     return NULL;
 }
 
@@ -70,14 +69,14 @@ static char *test_elastic_equal_mass() {
  *   ua=+1, ub=-1  →  va=0, vb=0
  */
 static char *test_perfectly_inelastic_equal_mass() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0,  1.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0, -1.0,0.0,0.0);
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0);
 
     inelastic_collision(&a, &b, 0.0);
 
-    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n",
-           a.velocity.x, a.velocity.y, a.velocity.z,
-           b.velocity.x, b.velocity.y, b.velocity.z);
+    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n", a.velocity.x,
+           a.velocity.y, a.velocity.z, b.velocity.x, b.velocity.y,
+           b.velocity.z);
 
     mu_assert_double_eq("perf-inelastic: v_a.x != 0", a.velocity.x, 0.0, 1e-10);
     mu_assert_double_eq("perf-inelastic: v_b.x != 0", b.velocity.x, 0.0, 1e-10);
@@ -93,14 +92,14 @@ static char *test_perfectly_inelastic_equal_mass() {
  *   vb = (0.5·2·(2−0) + 2·2 + 1·0) / 3 = (2+4)/3  = 2
  */
 static char *test_unequal_masses() {
-    PhysicsObject a = make_obj(2.0,  0.0,0.0,0.0,  2.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0,  0.0,0.0,0.0);
+    PhysicsObject a = make_obj(2.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
     inelastic_collision(&a, &b, 0.5);
 
-    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n",
-           a.velocity.x, a.velocity.y, a.velocity.z,
-           b.velocity.x, b.velocity.y, b.velocity.z);
+    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n", a.velocity.x,
+           a.velocity.y, a.velocity.z, b.velocity.x, b.velocity.y,
+           b.velocity.z);
 
     mu_assert_double_eq("unequal: v_a.x != 1", a.velocity.x, 1.0, 1e-10);
     mu_assert_double_eq("unequal: v_b.x != 2", b.velocity.x, 2.0, 1e-10);
@@ -115,8 +114,8 @@ static char *test_unequal_masses() {
  */
 static char *test_momentum_conserved() {
     double ma = 3.0, mb = 5.0;
-    PhysicsObject a = make_obj(ma,  0.0,0.0,0.0,  4.0,0.0,0.0);
-    PhysicsObject b = make_obj(mb,  1.0,0.0,0.0, -2.0,0.0,0.0);
+    PhysicsObject a = make_obj(ma, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(mb, 1.0, 0.0, 0.0, -2.0, 0.0, 0.0);
 
     double p_before = ma * 4.0 + mb * (-2.0);
 
@@ -127,8 +126,10 @@ static char *test_momentum_conserved() {
     printf("    p_before=%.6e  p_after=%.6e\n", p_before, p_after);
 
     mu_assert_double_eq("momentum: px not conserved", p_before, p_after, 1e-10);
-    mu_assert_double_eq("momentum: py not conserved", 0.0, ma*a.velocity.y + mb*b.velocity.y, 1e-10);
-    mu_assert_double_eq("momentum: pz not conserved", 0.0, ma*a.velocity.z + mb*b.velocity.z, 1e-10);
+    mu_assert_double_eq("momentum: py not conserved", 0.0,
+                        ma * a.velocity.y + mb * b.velocity.y, 1e-10);
+    mu_assert_double_eq("momentum: pz not conserved", 0.0,
+                        ma * a.velocity.z + mb * b.velocity.z, 1e-10);
     return NULL;
 }
 
@@ -137,13 +138,13 @@ static char *test_momentum_conserved() {
  * Velocity must not change.
  */
 static char *test_already_separating() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0, -1.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0,  1.0,0.0,0.0);
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
     inelastic_collision(&a, &b, 0.5);
 
     mu_assert_double_eq("separating: v_a.x changed", a.velocity.x, -1.0, 1e-10);
-    mu_assert_double_eq("separating: v_b.x changed", b.velocity.x,  1.0, 1e-10);
+    mu_assert_double_eq("separating: v_b.x changed", b.velocity.x, 1.0, 1e-10);
     return NULL;
 }
 
@@ -152,12 +153,12 @@ static char *test_already_separating() {
  * Velocity must not change.
  */
 static char *test_coincident_centres() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0,  1.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  0.0,0.0,0.0, -1.0,0.0,0.0);
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
 
     inelastic_collision(&a, &b, 0.5);
 
-    mu_assert_double_eq("coincident: v_a.x changed", a.velocity.x,  1.0, 1e-10);
+    mu_assert_double_eq("coincident: v_a.x changed", a.velocity.x, 1.0, 1e-10);
     mu_assert_double_eq("coincident: v_b.x changed", b.velocity.x, -1.0, 1e-10);
     return NULL;
 }
@@ -167,14 +168,14 @@ static char *test_coincident_centres() {
  * only collide along x. The y component of velocity must be unchanged.
  */
 static char *test_tangential_velocity_unchanged() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0,  1.0,3.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0, -1.0,3.0,0.0);
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, 1.0, 3.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, -1.0, 3.0, 0.0);
 
     inelastic_collision(&a, &b, 1.0);
 
-    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n",
-           a.velocity.x, a.velocity.y, a.velocity.z,
-           b.velocity.x, b.velocity.y, b.velocity.z);
+    printf("    v_a=(%.4f,%.4f,%.4f)  v_b=(%.4f,%.4f,%.4f)\n", a.velocity.x,
+           a.velocity.y, a.velocity.z, b.velocity.x, b.velocity.y,
+           b.velocity.z);
 
     mu_assert_double_eq("tangential: v_a.y changed", a.velocity.y, 3.0, 1e-10);
     mu_assert_double_eq("tangential: v_a.z changed", a.velocity.z, 0.0, 1e-10);
@@ -188,10 +189,10 @@ static char *test_tangential_velocity_unchanged() {
  * Pre-existing gravity force on each object must be preserved unchanged.
  */
 static char *test_force_untouched() {
-    PhysicsObject a = make_obj(1.0,  0.0,0.0,0.0,  1.0,0.0,0.0);
-    PhysicsObject b = make_obj(1.0,  1.0,0.0,0.0, -1.0,0.0,0.0);
-    a.force = (Vec3){ 5.0, 2.0, 0.0 };
-    b.force = (Vec3){ 3.0, 1.0, 0.0 };
+    PhysicsObject a = make_obj(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+    PhysicsObject b = make_obj(1.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0);
+    a.force = (Vec3){5.0, 2.0, 0.0};
+    b.force = (Vec3){3.0, 1.0, 0.0};
 
     inelastic_collision(&a, &b, 0.5);
 
@@ -207,14 +208,14 @@ static char *test_force_untouched() {
 /* ------------------------------------------------------------------ */
 
 static const TestCase tests[] = {
-    {"elastic_equal_mass",            test_elastic_equal_mass},
-    {"perfectly_inelastic_equal_mass",test_perfectly_inelastic_equal_mass},
-    {"unequal_masses",                test_unequal_masses},
-    {"momentum_conserved",            test_momentum_conserved},
-    {"already_separating",            test_already_separating},
-    {"coincident_centres",            test_coincident_centres},
+    {"elastic_equal_mass", test_elastic_equal_mass},
+    {"perfectly_inelastic_equal_mass", test_perfectly_inelastic_equal_mass},
+    {"unequal_masses", test_unequal_masses},
+    {"momentum_conserved", test_momentum_conserved},
+    {"already_separating", test_already_separating},
+    {"coincident_centres", test_coincident_centres},
     {"tangential_velocity_unchanged", test_tangential_velocity_unchanged},
-    {"force_untouched",               test_force_untouched},
+    {"force_untouched", test_force_untouched},
 };
 
 int main(void) {

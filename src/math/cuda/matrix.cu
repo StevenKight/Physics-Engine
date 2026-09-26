@@ -10,11 +10,11 @@
  * @date 2025-10-09
  */
 
-#include "matrix_mul.cu"
 #include "matrix_add.cu"
-#include "matrix_sub.cu"
-#include "matrix_scalar.cu"
-#include "matrix_power.cu"
 #include "matrix_div.cu"
-#include "matrix_sum.cu"
 #include "matrix_hadamard.cu"
+#include "matrix_mul.cu"
+#include "matrix_power.cu"
+#include "matrix_scalar.cu"
+#include "matrix_sub.cu"
+#include "matrix_sum.cu"

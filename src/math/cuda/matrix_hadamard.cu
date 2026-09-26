@@ -1,6 +1,7 @@
 /**
  * @file matrix_hadamard.cu
- * @brief CUDA implementation of element-wise matrix multiplication (Hadamard product).
+ * @brief CUDA implementation of element-wise matrix multiplication (Hadamard
+ * product).
  *
  * @author Steven Kight
  * @date 2026-04-10
@@ -21,7 +22,8 @@
  * @param[in] rows Number of rows in the matrices.
  * @param[in] cols Number of columns in the matrices.
  */
-__global__ void matrix_hadamard_kernel(double *a, double *b, double *r, int rows, int cols) {
+__global__ void matrix_hadamard_kernel(double *a, double *b, double *r,
+                                       int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -30,7 +32,8 @@ __global__ void matrix_hadamard_kernel(double *a, double *b, double *r, int rows
 }
 
 /**
- * @brief Host function to perform element-wise matrix multiplication using CUDA.
+ * @brief Host function to perform element-wise matrix multiplication using
+ * CUDA.
  *
  * @param[in] A  Pointer to the first input matrix (host memory).
  * @param[in] B  Pointer to the second input matrix (host memory).
@@ -38,9 +41,11 @@ __global__ void matrix_hadamard_kernel(double *a, double *b, double *r, int rows
  *
  * @note All matrices must have the same dimensions.
  */
-extern "C" void matrix_hadamard_cuda(const Matrix *A, const Matrix *B, Matrix *R) {
+extern "C" void matrix_hadamard_cuda(const Matrix *A, const Matrix *B,
+                                     Matrix *R) {
     if (A->rows != B->rows || A->cols != B->cols) {
-        std::cerr << "Matrix dimensions do not match for Hadamard product" << std::endl;
+        std::cerr << "Matrix dimensions do not match for Hadamard product"
+                  << std::endl;
         return;
     }
 
@@ -49,13 +54,19 @@ extern "C" void matrix_hadamard_cuda(const Matrix *A, const Matrix *B, Matrix *R
     cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(double));
     cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
 
     dim3 blockSize(16, 16);
     dim3 gridSize((A->cols + 15) / 16, (A->rows + 15) / 16);
-    matrix_hadamard_kernel<<<gridSize, blockSize>>>(d_a, d_b, d_r, A->rows, A->cols);
+    matrix_hadamard_kernel<<<gridSize, blockSize>>>(d_a, d_b, d_r, A->rows,
+                                                    A->cols);
 
-    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double), cudaMemcpyDeviceToHost);
-    cudaFree(d_a); cudaFree(d_b); cudaFree(d_r);
+    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double),
+               cudaMemcpyDeviceToHost);
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_r);
 }

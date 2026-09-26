@@ -30,15 +30,16 @@ int collision_detect(const PhysicsObject *objects, int count,
     octree_build(&s_pool, objects, count);
 
     static CollisionPair s_candidates[MAX_CANDIDATES];
-    int n_candidates = octree_query_pairs(&s_pool, s_candidates, MAX_CANDIDATES);
+    int n_candidates =
+        octree_query_pairs(&s_pool, s_candidates, MAX_CANDIDATES);
 
     if (n_candidates == 0)
         return 0;
 
     /* --- Phase 2: narrow phase --- */
     int out_count = 0;
-    sat_test_pairs(objects, s_candidates, n_candidates,
-                   pairs_out, &out_count, max_pairs);
+    sat_test_pairs(objects, s_candidates, n_candidates, pairs_out, &out_count,
+                   max_pairs);
 
     return out_count;
 }

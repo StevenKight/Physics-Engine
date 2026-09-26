@@ -25,9 +25,9 @@ static char *test_power_square_cpu() {
     matrix_power(&A_mat, &power, &C_mat, false);
 
     printf("    CPU: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_double_eq("C[0] incorrect", C[0],  1.0, 1e-9);
-    mu_assert_double_eq("C[1] incorrect", C[1],  4.0, 1e-9);
-    mu_assert_double_eq("C[2] incorrect", C[2],  9.0, 1e-9);
+    mu_assert_double_eq("C[0] incorrect", C[0], 1.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], 4.0, 1e-9);
+    mu_assert_double_eq("C[2] incorrect", C[2], 9.0, 1e-9);
     mu_assert_double_eq("C[3] incorrect", C[3], 16.0, 1e-9);
     return NULL;
 }
@@ -44,9 +44,9 @@ static char *test_power_square_gpu() {
     matrix_power(&A_mat, &power, &C_mat, true);
 
     printf("    GPU: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_double_eq("C[0] incorrect", C[0],  1.0, 1e-9);
-    mu_assert_double_eq("C[1] incorrect", C[1],  4.0, 1e-9);
-    mu_assert_double_eq("C[2] incorrect", C[2],  9.0, 1e-9);
+    mu_assert_double_eq("C[0] incorrect", C[0], 1.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], 4.0, 1e-9);
+    mu_assert_double_eq("C[2] incorrect", C[2], 9.0, 1e-9);
     mu_assert_double_eq("C[3] incorrect", C[3], 16.0, 1e-9);
     return NULL;
 }
@@ -65,8 +65,8 @@ static char *test_power_cube_cpu() {
     matrix_power(&A_mat, &power, &C_mat, false);
 
     printf("    CPU: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_double_eq("C[0] incorrect", C[0],  1.0, 1e-9);
-    mu_assert_double_eq("C[1] incorrect", C[1],  8.0, 1e-9);
+    mu_assert_double_eq("C[0] incorrect", C[0], 1.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], 8.0, 1e-9);
     mu_assert_double_eq("C[2] incorrect", C[2], 27.0, 1e-9);
     mu_assert_double_eq("C[3] incorrect", C[3], 64.0, 1e-9);
     return NULL;
@@ -84,8 +84,8 @@ static char *test_power_cube_gpu() {
     matrix_power(&A_mat, &power, &C_mat, true);
 
     printf("    GPU: %f %f %f %f\n", C[0], C[1], C[2], C[3]);
-    mu_assert_double_eq("C[0] incorrect", C[0],  1.0, 1e-9);
-    mu_assert_double_eq("C[1] incorrect", C[1],  8.0, 1e-9);
+    mu_assert_double_eq("C[0] incorrect", C[0], 1.0, 1e-9);
+    mu_assert_double_eq("C[1] incorrect", C[1], 8.0, 1e-9);
     mu_assert_double_eq("C[2] incorrect", C[2], 27.0, 1e-9);
     mu_assert_double_eq("C[3] incorrect", C[3], 64.0, 1e-9);
     return NULL;
@@ -134,10 +134,10 @@ static char *test_power_sqrt_gpu() {
 static const TestCase tests[] = {
     {"power_square_cpu", test_power_square_cpu},
     {"power_square_gpu", test_power_square_gpu},
-    {"power_cube_cpu",   test_power_cube_cpu},
-    {"power_cube_gpu",   test_power_cube_gpu},
-    {"power_sqrt_cpu",   test_power_sqrt_cpu},
-    {"power_sqrt_gpu",   test_power_sqrt_gpu},
+    {"power_cube_cpu", test_power_cube_cpu},
+    {"power_cube_gpu", test_power_cube_gpu},
+    {"power_sqrt_cpu", test_power_sqrt_cpu},
+    {"power_sqrt_gpu", test_power_sqrt_gpu},
 };
 
 int main(void) {

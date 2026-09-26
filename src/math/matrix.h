@@ -164,7 +164,8 @@ void matrix_scalar_sub(const void *A, const void *scalar, void *C,
  *
  * @param A       Pointer to input matrix (see backend layout notes).
  * @param power   Pointer to the exponent (double*).
- * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as
+ * A).
  * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_power(const void *A, const void *power, void *C, bool use_gpu);
@@ -174,7 +175,8 @@ void matrix_power(const void *A, const void *power, void *C, bool use_gpu);
  *
  * @param A       Pointer to the numerator matrix (see backend layout notes).
  * @param B       Pointer to the denominator matrix (same layout and dims as A).
- * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as
+ * A).
  * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  *
  * @note No division-by-zero checks are performed by either backend.
@@ -203,8 +205,10 @@ void matrix_col_sum(const void *A, void *R, bool use_gpu);
  * @brief Element-wise matrix multiplication (Hadamard product): C = A ⊙ B
  *
  * @param A       Pointer to the first input matrix (see backend layout notes).
- * @param B       Pointer to the second input matrix (same layout and dims as A).
- * @param C       Pointer to output matrix storage (pre-allocated, same dims as A).
+ * @param B       Pointer to the second input matrix (same layout and dims as
+ * A).
+ * @param C       Pointer to output matrix storage (pre-allocated, same dims as
+ * A).
  * @param use_gpu Choose CUDA (true) or Fortran (false) backend.
  */
 void matrix_hadamard(const void *A, const void *B, void *C, bool use_gpu);

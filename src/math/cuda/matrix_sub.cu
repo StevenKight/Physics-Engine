@@ -2,10 +2,9 @@
 
 #include <iostream>
 
-
 /**
  * @brief Kernel: element-wise subtraction R = A - B
- * 
+ *
  * This kernel computes the element-wise subtraction of two matrices A and B,
  * storing the result in matrix R. Each thread calculates one element of the
  * output matrix.
@@ -16,7 +15,8 @@
  * @param[in] rows Number of rows
  * @param[in] cols Number of columns
  */
-__global__ void matrix_subtract_kernel(double *a, double *b, double *r, int rows, int cols) {
+__global__ void matrix_subtract_kernel(double *a, double *b, double *r,
+                                       int rows, int cols) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -34,11 +34,14 @@ __global__ void matrix_subtract_kernel(double *a, double *b, double *r, int rows
  * @param[in] B Pointer to second input matrix (host memory)
  * @param[out] R Pointer to result matrix (host memory)
  *
- * @note All matrices must have the same dimensions. If not, the function prints an error and returns.
+ * @note All matrices must have the same dimensions. If not, the function prints
+ * an error and returns.
  */
-extern "C" void matrix_subtract_cuda(const Matrix *A, const Matrix *B, Matrix *R) {
+extern "C" void matrix_subtract_cuda(const Matrix *A, const Matrix *B,
+                                     Matrix *R) {
     if (A->rows != B->rows || A->cols != B->cols) {
-        std::cerr << "Matrix dimensions do not match for subtraction" << std::endl;
+        std::cerr << "Matrix dimensions do not match for subtraction"
+                  << std::endl;
         return;
     }
 
@@ -47,13 +50,19 @@ extern "C" void matrix_subtract_cuda(const Matrix *A, const Matrix *B, Matrix *R
     cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(double));
     cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
 
     dim3 blockSize(16, 16);
     dim3 gridSize((A->cols + 15) / 16, (A->rows + 15) / 16);
-    matrix_subtract_kernel<<<gridSize, blockSize>>>(d_a, d_b, d_r, A->rows, A->cols);
+    matrix_subtract_kernel<<<gridSize, blockSize>>>(d_a, d_b, d_r, A->rows,
+                                                    A->cols);
 
-    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double), cudaMemcpyDeviceToHost);
-    cudaFree(d_a); cudaFree(d_b); cudaFree(d_r);
+    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double),
+               cudaMemcpyDeviceToHost);
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_r);
 }

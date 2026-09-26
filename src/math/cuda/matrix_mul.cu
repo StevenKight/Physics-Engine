@@ -2,8 +2,9 @@
  * @file matrix_mul.cu
  * @brief CUDA implementations for matrix multiplication operations.
  *
- * This file contains device and host functions for performing matrix multiplication on the GPU.
- * Functions are designed for use in high-performance scientific computing and research applications.
+ * This file contains device and host functions for performing matrix
+ * multiplication on the GPU. Functions are designed for use in high-performance
+ * scientific computing and research applications.
  *
  * @author Steven Kight
  * @date 2025-10-09
@@ -11,7 +12,6 @@
 #include "matrix_core.h"
 
 #include <iostream>
-
 
 /**
  * @brief CUDA kernel performing matrix multiplication.
@@ -29,11 +29,9 @@
  * @param[in] rows_r Number of rows in result
  * @param[in] cols_r Number of cols in result
  */
-__global__ void matrix_multiply_kernel(
-    double *a, int rows_a, int cols_a,
-    double *b, int rows_b, int cols_b,
-    double *r, int rows_r, int cols_r
-) {
+__global__ void matrix_multiply_kernel(double *a, int rows_a, int cols_a,
+                                       double *b, int rows_b, int cols_b,
+                                       double *r, int rows_r, int cols_r) {
     int row = blockIdx.y * blockDim.y + threadIdx.y;
     int col = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -47,7 +45,8 @@ __global__ void matrix_multiply_kernel(
 }
 
 /**
- * @brief Host wrapper that prepares device memory and launches the multiply kernel.
+ * @brief Host wrapper that prepares device memory and launches the multiply
+ * kernel.
  *
  * This function validates input dimensions, allocates device buffers, copies
  * input data to device, launches the kernel, and retrieves the result.
@@ -56,9 +55,11 @@ __global__ void matrix_multiply_kernel(
  * @param[in] B Pointer to right-hand matrix (host memory)
  * @param[out] R Pointer to result matrix (host memory)
  */
-extern "C" void matrix_multiply_cuda(const Matrix *A, const Matrix *B, Matrix *R) {
+extern "C" void matrix_multiply_cuda(const Matrix *A, const Matrix *B,
+                                     Matrix *R) {
     if (A->cols != B->rows) {
-        std::cerr << "Matrix dimensions do not match for multiplication" << std::endl;
+        std::cerr << "Matrix dimensions do not match for multiplication"
+                  << std::endl;
         return;
     }
 
@@ -67,13 +68,19 @@ extern "C" void matrix_multiply_cuda(const Matrix *A, const Matrix *B, Matrix *R
     cudaMalloc((void **)&d_b, B->rows * B->cols * sizeof(double));
     cudaMalloc((void **)&d_r, R->rows * R->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
+    cudaMemcpy(d_b, B->data, B->rows * B->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
 
     dim3 blockSize(16, 16);
     dim3 gridSize((R->cols + 15) / 16, (R->rows + 15) / 16);
-    matrix_multiply_kernel<<<gridSize, blockSize>>>(d_a, A->rows, A->cols, d_b, B->rows, B->cols, d_r, R->rows, R->cols);
+    matrix_multiply_kernel<<<gridSize, blockSize>>>(
+        d_a, A->rows, A->cols, d_b, B->rows, B->cols, d_r, R->rows, R->cols);
 
-    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double), cudaMemcpyDeviceToHost);
-    cudaFree(d_a); cudaFree(d_b); cudaFree(d_r);
+    cudaMemcpy(R->data, d_r, R->rows * R->cols * sizeof(double),
+               cudaMemcpyDeviceToHost);
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_r);
 }

@@ -8,22 +8,25 @@
 #include "collision.h"
 #include "../../math/vec3.h"
 
-void inelastic_collision(PhysicsObject *a, PhysicsObject *b, double restitution) {
-    Vec3   delta = vec3_sub(b->position, a->position);
-    double dist  = vec3_magnitude(delta);
-    if (dist < 1e-10) return;  /* coincident centres — no well-defined normal */
+void inelastic_collision(PhysicsObject *a, PhysicsObject *b,
+                         double restitution) {
+    Vec3 delta = vec3_sub(b->position, a->position);
+    double dist = vec3_magnitude(delta);
+    if (dist < 1e-10)
+        return; /* coincident centres — no well-defined normal */
 
-    Vec3 n = vec3_scale(delta, 1.0 / dist);  /* unit collision normal */
+    Vec3 n = vec3_scale(delta, 1.0 / dist); /* unit collision normal */
 
     /* Scalar velocity components along the normal */
     double ua = vec3_dot(a->velocity, n);
     double ub = vec3_dot(b->velocity, n);
 
     /* Skip if objects are already separating along the normal */
-    if (ua <= ub) return;
+    if (ua <= ub)
+        return;
 
-    double ma    = a->mass;
-    double mb    = b->mass;
+    double ma = a->mass;
+    double mb = b->mass;
     double total = ma + mb;
 
     /* Post-collision velocities along the normal (inelastic formula) */

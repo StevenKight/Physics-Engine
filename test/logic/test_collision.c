@@ -19,37 +19,62 @@
 
 /*
  * Unit cube centred at the origin in local space.
- * 8 vertices, 12 triangular faces (2 per axis-aligned square face), CCW winding.
+ * 8 vertices, 12 triangular faces (2 per axis-aligned square face), CCW
+ * winding.
  */
-static void make_unit_cube(PhysicsObject *obj, double mass,
-                             double x, double y, double z) {
+static void make_unit_cube(PhysicsObject *obj, double mass, double x, double y,
+                           double z) {
     memset(obj, 0, sizeof(*obj));
-    obj->mass     = mass;
-    obj->position = (Vec3){ x, y, z };
+    obj->mass = mass;
+    obj->position = (Vec3){x, y, z};
 
     obj->vertex_count = 8;
-    obj->local_verts[0] = (Vec3){ -0.5, -0.5, -0.5 };
-    obj->local_verts[1] = (Vec3){  0.5, -0.5, -0.5 };
-    obj->local_verts[2] = (Vec3){  0.5,  0.5, -0.5 };
-    obj->local_verts[3] = (Vec3){ -0.5,  0.5, -0.5 };
-    obj->local_verts[4] = (Vec3){ -0.5, -0.5,  0.5 };
-    obj->local_verts[5] = (Vec3){  0.5, -0.5,  0.5 };
-    obj->local_verts[6] = (Vec3){  0.5,  0.5,  0.5 };
-    obj->local_verts[7] = (Vec3){ -0.5,  0.5,  0.5 };
+    obj->local_verts[0] = (Vec3){-0.5, -0.5, -0.5};
+    obj->local_verts[1] = (Vec3){0.5, -0.5, -0.5};
+    obj->local_verts[2] = (Vec3){0.5, 0.5, -0.5};
+    obj->local_verts[3] = (Vec3){-0.5, 0.5, -0.5};
+    obj->local_verts[4] = (Vec3){-0.5, -0.5, 0.5};
+    obj->local_verts[5] = (Vec3){0.5, -0.5, 0.5};
+    obj->local_verts[6] = (Vec3){0.5, 0.5, 0.5};
+    obj->local_verts[7] = (Vec3){-0.5, 0.5, 0.5};
 
     obj->face_count = 12;
-    /* -z face */  obj->face_indices[0][0]=0; obj->face_indices[0][1]=1; obj->face_indices[0][2]=2;
-                   obj->face_indices[1][0]=0; obj->face_indices[1][1]=2; obj->face_indices[1][2]=3;
-    /* +z face */  obj->face_indices[2][0]=4; obj->face_indices[2][1]=6; obj->face_indices[2][2]=5;
-                   obj->face_indices[3][0]=4; obj->face_indices[3][1]=7; obj->face_indices[3][2]=6;
-    /* -x face */  obj->face_indices[4][0]=0; obj->face_indices[4][1]=3; obj->face_indices[4][2]=7;
-                   obj->face_indices[5][0]=0; obj->face_indices[5][1]=7; obj->face_indices[5][2]=4;
-    /* +x face */  obj->face_indices[6][0]=1; obj->face_indices[6][1]=5; obj->face_indices[6][2]=6;
-                   obj->face_indices[7][0]=1; obj->face_indices[7][1]=6; obj->face_indices[7][2]=2;
-    /* -y face */  obj->face_indices[8][0]=0; obj->face_indices[8][1]=4; obj->face_indices[8][2]=5;
-                   obj->face_indices[9][0]=0; obj->face_indices[9][1]=5; obj->face_indices[9][2]=1;
-    /* +y face */  obj->face_indices[10][0]=3; obj->face_indices[10][1]=2; obj->face_indices[10][2]=6;
-                   obj->face_indices[11][0]=3; obj->face_indices[11][1]=6; obj->face_indices[11][2]=7;
+    /* -z face */ obj->face_indices[0][0] = 0;
+    obj->face_indices[0][1] = 1;
+    obj->face_indices[0][2] = 2;
+    obj->face_indices[1][0] = 0;
+    obj->face_indices[1][1] = 2;
+    obj->face_indices[1][2] = 3;
+    /* +z face */ obj->face_indices[2][0] = 4;
+    obj->face_indices[2][1] = 6;
+    obj->face_indices[2][2] = 5;
+    obj->face_indices[3][0] = 4;
+    obj->face_indices[3][1] = 7;
+    obj->face_indices[3][2] = 6;
+    /* -x face */ obj->face_indices[4][0] = 0;
+    obj->face_indices[4][1] = 3;
+    obj->face_indices[4][2] = 7;
+    obj->face_indices[5][0] = 0;
+    obj->face_indices[5][1] = 7;
+    obj->face_indices[5][2] = 4;
+    /* +x face */ obj->face_indices[6][0] = 1;
+    obj->face_indices[6][1] = 5;
+    obj->face_indices[6][2] = 6;
+    obj->face_indices[7][0] = 1;
+    obj->face_indices[7][1] = 6;
+    obj->face_indices[7][2] = 2;
+    /* -y face */ obj->face_indices[8][0] = 0;
+    obj->face_indices[8][1] = 4;
+    obj->face_indices[8][2] = 5;
+    obj->face_indices[9][0] = 0;
+    obj->face_indices[9][1] = 5;
+    obj->face_indices[9][2] = 1;
+    /* +y face */ obj->face_indices[10][0] = 3;
+    obj->face_indices[10][1] = 2;
+    obj->face_indices[10][2] = 6;
+    obj->face_indices[11][0] = 3;
+    obj->face_indices[11][1] = 6;
+    obj->face_indices[11][2] = 7;
 }
 
 /* ------------------------------------------------------------------ */
@@ -58,8 +83,8 @@ static void make_unit_cube(PhysicsObject *obj, double mass,
 
 static char *test_sat_separated() {
     PhysicsObject a, b;
-    make_unit_cube(&a, 1.0,  0.0, 0.0, 0.0);
-    make_unit_cube(&b, 1.0, 10.0, 0.0, 0.0);  /* 10 m away — clear gap */
+    make_unit_cube(&a, 1.0, 0.0, 0.0, 0.0);
+    make_unit_cube(&b, 1.0, 10.0, 0.0, 0.0); /* 10 m away — clear gap */
     mu_assert("separated cubes must not intersect", !sat_test_one(&a, &b));
     return NULL;
 }
@@ -67,16 +92,17 @@ static char *test_sat_separated() {
 static char *test_sat_overlapping() {
     PhysicsObject a, b;
     make_unit_cube(&a, 1.0, 0.0, 0.0, 0.0);
-    make_unit_cube(&b, 1.0, 0.4, 0.0, 0.0);  /* centres 0.4 m apart → overlap */
+    make_unit_cube(&b, 1.0, 0.4, 0.0, 0.0); /* centres 0.4 m apart → overlap */
     mu_assert("overlapping cubes must intersect", sat_test_one(&a, &b));
     return NULL;
 }
 
 static char *test_sat_touching_face() {
-    /* Faces exactly touching on x axis — convention: touching counts as overlap */
+    /* Faces exactly touching on x axis — convention: touching counts as overlap
+     */
     PhysicsObject a, b;
     make_unit_cube(&a, 1.0, 0.0, 0.0, 0.0);
-    make_unit_cube(&b, 1.0, 1.0, 0.0, 0.0);  /* gap is exactly 0 */
+    make_unit_cube(&b, 1.0, 1.0, 0.0, 0.0); /* gap is exactly 0 */
     /* Touching = intervals_overlap returns 1 (max_a >= min_b) */
     mu_assert("touching face-to-face must be counted as overlap",
               sat_test_one(&a, &b));
@@ -105,7 +131,7 @@ static char *test_detect_single() {
 
 static char *test_detect_two_separated() {
     PhysicsObject objects[2];
-    make_unit_cube(&objects[0], 1.0,  0.0, 0.0, 0.0);
+    make_unit_cube(&objects[0], 1.0, 0.0, 0.0, 0.0);
     make_unit_cube(&objects[1], 1.0, 10.0, 0.0, 0.0);
     CollisionPair pairs[16];
     int n = collision_detect(objects, 2, pairs, 16);
@@ -127,9 +153,9 @@ static char *test_detect_two_overlapping() {
 
 static char *test_detect_three_one_overlap() {
     PhysicsObject objects[3];
-    make_unit_cube(&objects[0], 1.0,  0.0, 0.0, 0.0);
-    make_unit_cube(&objects[1], 1.0,  0.4, 0.0, 0.0);  /* overlaps [0] */
-    make_unit_cube(&objects[2], 1.0, 50.0, 0.0, 0.0);  /* far away */
+    make_unit_cube(&objects[0], 1.0, 0.0, 0.0, 0.0);
+    make_unit_cube(&objects[1], 1.0, 0.4, 0.0, 0.0);  /* overlaps [0] */
+    make_unit_cube(&objects[2], 1.0, 50.0, 0.0, 0.0); /* far away */
     CollisionPair pairs[16];
     int n = collision_detect(objects, 3, pairs, 16);
     mu_assert("three objects, one overlap → 1 pair", n == 1);
@@ -140,8 +166,8 @@ static char *test_detect_three_one_overlap() {
 static char *test_detect_three_all_overlap() {
     PhysicsObject objects[3];
     make_unit_cube(&objects[0], 1.0, 0.0, 0.0, 0.0);
-    make_unit_cube(&objects[1], 1.0, 0.3, 0.0, 0.0);  /* overlaps [0] and [2] */
-    make_unit_cube(&objects[2], 1.0, 0.6, 0.0, 0.0);  /* overlaps [1] */
+    make_unit_cube(&objects[1], 1.0, 0.3, 0.0, 0.0); /* overlaps [0] and [2] */
+    make_unit_cube(&objects[2], 1.0, 0.6, 0.0, 0.0); /* overlaps [1] */
     CollisionPair pairs[16];
     int n = collision_detect(objects, 3, pairs, 16);
     mu_assert("three clustered cubes → 3 pairs", n == 3);
@@ -192,7 +218,7 @@ static char *test_detect_determinism() {
         int found = 0;
         for (int j = 0; j < n2; j++) {
             if (pairs1[i].index_a == pairs2[j].index_a &&
-                    pairs1[i].index_b == pairs2[j].index_b) {
+                pairs1[i].index_b == pairs2[j].index_b) {
                 found = 1;
                 break;
             }
@@ -203,17 +229,17 @@ static char *test_detect_determinism() {
 }
 
 static const TestCase tests[] = {
-    {"sat_separated",           test_sat_separated},
-    {"sat_overlapping",         test_sat_overlapping},
-    {"sat_touching_face",       test_sat_touching_face},
-    {"detect_empty",            test_detect_empty},
-    {"detect_single",           test_detect_single},
-    {"detect_two_separated",    test_detect_two_separated},
-    {"detect_two_overlapping",  test_detect_two_overlapping},
-    {"detect_three_one_overlap",test_detect_three_one_overlap},
-    {"detect_three_all_overlap",test_detect_three_all_overlap},
-    {"detect_no_duplicates",    test_detect_no_duplicates},
-    {"detect_determinism",      test_detect_determinism},
+    {"sat_separated", test_sat_separated},
+    {"sat_overlapping", test_sat_overlapping},
+    {"sat_touching_face", test_sat_touching_face},
+    {"detect_empty", test_detect_empty},
+    {"detect_single", test_detect_single},
+    {"detect_two_separated", test_detect_two_separated},
+    {"detect_two_overlapping", test_detect_two_overlapping},
+    {"detect_three_one_overlap", test_detect_three_one_overlap},
+    {"detect_three_all_overlap", test_detect_three_all_overlap},
+    {"detect_no_duplicates", test_detect_no_duplicates},
+    {"detect_determinism", test_detect_determinism},
 };
 
 int main(void) {

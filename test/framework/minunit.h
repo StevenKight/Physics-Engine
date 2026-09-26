@@ -12,7 +12,7 @@ extern int tests_run;
             return message;                                                    \
     } while (0)
 
-#define mu_assert_double_eq(message, a, b, tol)                               \
+#define mu_assert_double_eq(message, a, b, tol)                                \
     do {                                                                       \
         double _a = (double)(a);                                               \
         double _b = (double)(b);                                               \

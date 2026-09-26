@@ -20,11 +20,11 @@
  */
 static char *test_rest_no_force() {
     PhysicsObject obj = {
-        .mass         = 1.0,
-        .position     = {0.0, 0.0, 0.0},
-        .velocity     = {0.0, 0.0, 0.0},
+        .mass = 1.0,
+        .position = {0.0, 0.0, 0.0},
+        .velocity = {0.0, 0.0, 0.0},
         .acceleration = {0.0, 0.0, 0.0},
-        .force        = {0.0, 0.0, 0.0},
+        .force = {0.0, 0.0, 0.0},
     };
 
     object_step(&obj, 1.0);
@@ -47,21 +47,21 @@ static char *test_rest_no_force() {
  */
 static char *test_uniform_motion() {
     PhysicsObject obj = {
-        .mass         = 1.0,
-        .position     = {1.0, 2.0, 3.0},
-        .velocity     = {4.0, 5.0, 6.0},
+        .mass = 1.0,
+        .position = {1.0, 2.0, 3.0},
+        .velocity = {4.0, 5.0, 6.0},
         .acceleration = {0.0, 0.0, 0.0},
-        .force        = {0.0, 0.0, 0.0},
+        .force = {0.0, 0.0, 0.0},
     };
 
     object_step(&obj, 0.5);
 
-    mu_assert_double_eq("uniform: pos.x != 3",   obj.position.x, 3.0, 1e-15);
+    mu_assert_double_eq("uniform: pos.x != 3", obj.position.x, 3.0, 1e-15);
     mu_assert_double_eq("uniform: pos.y != 4.5", obj.position.y, 4.5, 1e-15);
-    mu_assert_double_eq("uniform: pos.z != 6",   obj.position.z, 6.0, 1e-15);
-    mu_assert_double_eq("uniform: vel.x != 4",   obj.velocity.x, 4.0, 1e-15);
-    mu_assert_double_eq("uniform: vel.y != 5",   obj.velocity.y, 5.0, 1e-15);
-    mu_assert_double_eq("uniform: vel.z != 6",   obj.velocity.z, 6.0, 1e-15);
+    mu_assert_double_eq("uniform: pos.z != 6", obj.position.z, 6.0, 1e-15);
+    mu_assert_double_eq("uniform: vel.x != 4", obj.velocity.x, 4.0, 1e-15);
+    mu_assert_double_eq("uniform: vel.y != 5", obj.velocity.y, 5.0, 1e-15);
+    mu_assert_double_eq("uniform: vel.z != 6", obj.velocity.z, 6.0, 1e-15);
     return NULL;
 }
 
@@ -70,18 +70,19 @@ static char *test_uniform_motion() {
  *
  * With zero initial velocity and acceleration, the position formula gives
  * x_{t+dt} = 0 (both v_t and a_t are zero). Velocity picks up half the new
- * acceleration because the Verlet average is (a_t + a_{t+dt}) / 2 = (0 + 2) / 2.
+ * acceleration because the Verlet average is (a_t + a_{t+dt}) / 2 = (0 + 2)
+ * / 2.
  *
  * Initial: mass=2, pos=0, vel=0, acc=0, force=(4,0,0), dt=1
  * Expected: pos=(0,0,0), vel=(1,0,0), acc=(2,0,0)
  */
 static char *test_constant_force_first_step() {
     PhysicsObject obj = {
-        .mass         = 2.0,
-        .position     = {0.0, 0.0, 0.0},
-        .velocity     = {0.0, 0.0, 0.0},
+        .mass = 2.0,
+        .position = {0.0, 0.0, 0.0},
+        .velocity = {0.0, 0.0, 0.0},
         .acceleration = {0.0, 0.0, 0.0},
-        .force        = {4.0, 0.0, 0.0},
+        .force = {4.0, 0.0, 0.0},
     };
 
     object_step(&obj, 1.0);
@@ -97,7 +98,8 @@ static char *test_constant_force_first_step() {
 }
 
 /**
- * Subsequent step with prior acceleration already set (simulates a second step).
+ * Subsequent step with prior acceleration already set (simulates a second
+ * step).
  *
  * This exercises the Verlet average: (a_t + a_{t+dt}) / 2 = (2 + 2) / 2 = 2.
  *
@@ -109,11 +111,11 @@ static char *test_constant_force_first_step() {
  */
 static char *test_constant_force_second_step() {
     PhysicsObject obj = {
-        .mass         = 2.0,
-        .position     = {0.0, 0.0, 0.0},
-        .velocity     = {1.0, 0.0, 0.0},
+        .mass = 2.0,
+        .position = {0.0, 0.0, 0.0},
+        .velocity = {1.0, 0.0, 0.0},
         .acceleration = {2.0, 0.0, 0.0},
-        .force        = {4.0, 0.0, 0.0},
+        .force = {4.0, 0.0, 0.0},
     };
 
     object_step(&obj, 1.0);
@@ -133,11 +135,11 @@ static char *test_constant_force_second_step() {
  */
 static char *test_force_reset() {
     PhysicsObject obj = {
-        .mass         = 1.0,
-        .position     = {0.0, 0.0, 0.0},
-        .velocity     = {0.0, 0.0, 0.0},
+        .mass = 1.0,
+        .position = {0.0, 0.0, 0.0},
+        .velocity = {0.0, 0.0, 0.0},
         .acceleration = {0.0, 0.0, 0.0},
-        .force        = {3.0, 5.0, 7.0},
+        .force = {3.0, 5.0, 7.0},
     };
 
     object_step(&obj, 1.0);
@@ -149,11 +151,11 @@ static char *test_force_reset() {
 }
 
 static const TestCase tests[] = {
-    {"rest_no_force",             test_rest_no_force},
-    {"uniform_motion",            test_uniform_motion},
+    {"rest_no_force", test_rest_no_force},
+    {"uniform_motion", test_uniform_motion},
     {"constant_force_first_step", test_constant_force_first_step},
-    {"constant_force_second_step",test_constant_force_second_step},
-    {"force_reset",               test_force_reset},
+    {"constant_force_second_step", test_constant_force_second_step},
+    {"force_reset", test_force_reset},
 };
 
 int main(void) {

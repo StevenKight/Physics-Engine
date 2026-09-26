@@ -13,7 +13,6 @@
 
 #include <iostream>
 
-
 /**
  * @brief Kernel: sum each row of a matrix into a column vector.
  *
@@ -24,7 +23,8 @@
  * @param[in]  rows Number of rows.
  * @param[in]  cols Number of columns.
  */
-__global__ void matrix_row_sum_kernel(double *a, double *r, int rows, int cols) {
+__global__ void matrix_row_sum_kernel(double *a, double *r, int rows,
+                                      int cols) {
     int row = blockIdx.x * blockDim.x + threadIdx.x;
     if (row < rows) {
         double sum = 0.0;
@@ -44,7 +44,8 @@ __global__ void matrix_row_sum_kernel(double *a, double *r, int rows, int cols) 
  * @param[in]  rows Number of rows.
  * @param[in]  cols Number of columns.
  */
-__global__ void matrix_col_sum_kernel(double *a, double *r, int rows, int cols) {
+__global__ void matrix_col_sum_kernel(double *a, double *r, int rows,
+                                      int cols) {
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     if (col < cols) {
         double sum = 0.0;
@@ -55,7 +56,8 @@ __global__ void matrix_col_sum_kernel(double *a, double *r, int rows, int cols) 
 }
 
 /**
- * @brief Host wrapper: sum each row of a matrix into a column vector using the GPU.
+ * @brief Host wrapper: sum each row of a matrix into a column vector using the
+ * GPU.
  *
  * @param[in]  A Pointer to input matrix (host memory, rows x cols).
  * @param[out] R Pointer to result matrix (host memory, rows x 1). Must be
@@ -63,7 +65,8 @@ __global__ void matrix_col_sum_kernel(double *a, double *r, int rows, int cols) 
  */
 extern "C" void matrix_row_sum_cuda(const Matrix *A, Matrix *R) {
     if (R->rows != A->rows || R->cols != 1) {
-        std::cerr << "Output matrix must be (rows x 1) for row sum" << std::endl;
+        std::cerr << "Output matrix must be (rows x 1) for row sum"
+                  << std::endl;
         return;
     }
 
@@ -71,18 +74,21 @@ extern "C" void matrix_row_sum_cuda(const Matrix *A, Matrix *R) {
     cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(double));
     cudaMalloc((void **)&d_r, A->rows * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
 
     int blockSize = 256;
     int gridSize = (A->rows + blockSize - 1) / blockSize;
     matrix_row_sum_kernel<<<gridSize, blockSize>>>(d_a, d_r, A->rows, A->cols);
 
     cudaMemcpy(R->data, d_r, A->rows * sizeof(double), cudaMemcpyDeviceToHost);
-    cudaFree(d_a); cudaFree(d_r);
+    cudaFree(d_a);
+    cudaFree(d_r);
 }
 
 /**
- * @brief Host wrapper: sum each column of a matrix into a row vector using the GPU.
+ * @brief Host wrapper: sum each column of a matrix into a row vector using the
+ * GPU.
  *
  * @param[in]  A Pointer to input matrix (host memory, rows x cols).
  * @param[out] R Pointer to result matrix (host memory, 1 x cols). Must be
@@ -90,7 +96,8 @@ extern "C" void matrix_row_sum_cuda(const Matrix *A, Matrix *R) {
  */
 extern "C" void matrix_col_sum_cuda(const Matrix *A, Matrix *R) {
     if (R->rows != 1 || R->cols != A->cols) {
-        std::cerr << "Output matrix must be (1 x cols) for column sum" << std::endl;
+        std::cerr << "Output matrix must be (1 x cols) for column sum"
+                  << std::endl;
         return;
     }
 
@@ -98,12 +105,14 @@ extern "C" void matrix_col_sum_cuda(const Matrix *A, Matrix *R) {
     cudaMalloc((void **)&d_a, A->rows * A->cols * sizeof(double));
     cudaMalloc((void **)&d_r, A->cols * sizeof(double));
 
-    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_a, A->data, A->rows * A->cols * sizeof(double),
+               cudaMemcpyHostToDevice);
 
     int blockSize = 256;
     int gridSize = (A->cols + blockSize - 1) / blockSize;
     matrix_col_sum_kernel<<<gridSize, blockSize>>>(d_a, d_r, A->rows, A->cols);
 
     cudaMemcpy(R->data, d_r, A->cols * sizeof(double), cudaMemcpyDeviceToHost);
-    cudaFree(d_a); cudaFree(d_r);
+    cudaFree(d_a);
+    cudaFree(d_r);
 }

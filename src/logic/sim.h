@@ -37,7 +37,6 @@ extern "C" {
 void sim_run(PhysicsObject *objects, int count, double time_step,
              int num_steps);
 
-
 #ifdef __cplusplus
 }
 #endif

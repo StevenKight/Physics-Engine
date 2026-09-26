@@ -39,44 +39,47 @@ static bool gravity_use_gpu(int count) {
 }
 
 /**
- * Computes pairwise displacement matrices ΔX, ΔY, ΔZ (see §Force Direction Vector
- * — Matrix Derivations) where each element is the signed difference:
+ * Computes pairwise displacement matrices ΔX, ΔY, ΔZ (see §Force Direction
+ * Vector — Matrix Derivations) where each element is the signed difference:
  *
  *   ΔX[i,j] = x_j - x_i   (likewise for y and z)
  *
- * Computed via broadcasting outer products (see §Distance Calculation — Optimization):
+ * Computed via broadcasting outer products (see §Distance Calculation —
+ * Optimization):
  *
  *   xi = x * 1^T   →  xi[i,j] = x_i   (x broadcast across columns)
  *   xj = 1 * x^T   →  xj[i,j] = x_j   (x broadcast across rows)
  *   ΔX = xj − xi   →  ΔX[i,j] = x_j − x_i
  *
  * The sign convention here means ΔX[i,j] points from body i toward body j,
- * which is the correct direction for the attractive gravitational force on body i.
+ * which is the correct direction for the attractive gravitational force on body
+ * i.
  *
  * The caller owns the returned data pointers and must free them.
  */
-static void compute_displacements(const PhysicsObject *objects, int count, bool use_gpu,
-                                   double **dx_out, double **dy_out, double **dz_out) {
-    double *x_data    = malloc(count * sizeof(double));
-    double *y_data    = malloc(count * sizeof(double));
-    double *z_data    = malloc(count * sizeof(double));
+static void compute_displacements(const PhysicsObject *objects, int count,
+                                  bool use_gpu, double **dx_out,
+                                  double **dy_out, double **dz_out) {
+    double *x_data = malloc(count * sizeof(double));
+    double *y_data = malloc(count * sizeof(double));
+    double *z_data = malloc(count * sizeof(double));
     double *ones_data = malloc(count * sizeof(double));
 
     for (int i = 0; i < count; i++) {
-        x_data[i]    = objects[i].position.x;
-        y_data[i]    = objects[i].position.y;
-        z_data[i]    = objects[i].position.z;
+        x_data[i] = objects[i].position.x;
+        y_data[i] = objects[i].position.y;
+        z_data[i] = objects[i].position.z;
         ones_data[i] = 1.0;
     }
 
-    Matrix x_col    = { .rows = count, .cols = 1,     .data = x_data    };
-    Matrix x_row    = { .rows = 1,     .cols = count, .data = x_data    };
-    Matrix y_col    = { .rows = count, .cols = 1,     .data = y_data    };
-    Matrix y_row    = { .rows = 1,     .cols = count, .data = y_data    };
-    Matrix z_col    = { .rows = count, .cols = 1,     .data = z_data    };
-    Matrix z_row    = { .rows = 1,     .cols = count, .data = z_data    };
-    Matrix ones_col = { .rows = count, .cols = 1,     .data = ones_data };
-    Matrix ones_row = { .rows = 1,     .cols = count, .data = ones_data };
+    Matrix x_col = {.rows = count, .cols = 1, .data = x_data};
+    Matrix x_row = {.rows = 1, .cols = count, .data = x_data};
+    Matrix y_col = {.rows = count, .cols = 1, .data = y_data};
+    Matrix y_row = {.rows = 1, .cols = count, .data = y_data};
+    Matrix z_col = {.rows = count, .cols = 1, .data = z_data};
+    Matrix z_row = {.rows = 1, .cols = count, .data = z_data};
+    Matrix ones_col = {.rows = count, .cols = 1, .data = ones_data};
+    Matrix ones_row = {.rows = 1, .cols = count, .data = ones_data};
 
     // Allocate N×N broadcast and difference matrices for each axis
     double *xi_data = calloc(count * count, sizeof(double));
@@ -89,34 +92,41 @@ static void compute_displacements(const PhysicsObject *objects, int count, bool 
     double *zj_data = calloc(count * count, sizeof(double));
     double *dz_data = calloc(count * count, sizeof(double));
 
-    Matrix xi = { count, count, xi_data }; // [i,j] = x_i  (x * 1^T)
-    Matrix xj = { count, count, xj_data }; // [i,j] = x_j  (1 * x^T)
-    Matrix dx = { count, count, dx_data }; // [i,j] = x_j - x_i  (ΔX)
-    Matrix yi = { count, count, yi_data };
-    Matrix yj = { count, count, yj_data };
-    Matrix dy = { count, count, dy_data };
-    Matrix zi = { count, count, zi_data };
-    Matrix zj = { count, count, zj_data };
-    Matrix dz = { count, count, dz_data };
+    Matrix xi = {count, count, xi_data}; // [i,j] = x_i  (x * 1^T)
+    Matrix xj = {count, count, xj_data}; // [i,j] = x_j  (1 * x^T)
+    Matrix dx = {count, count, dx_data}; // [i,j] = x_j - x_i  (ΔX)
+    Matrix yi = {count, count, yi_data};
+    Matrix yj = {count, count, yj_data};
+    Matrix dy = {count, count, dy_data};
+    Matrix zi = {count, count, zi_data};
+    Matrix zj = {count, count, zj_data};
+    Matrix dz = {count, count, dz_data};
 
-    // Broadcast each coordinate into N×N matrices, then subtract to get ΔX/ΔY/ΔZ.
-    // xi = x * 1^T  (each row is x^T),  xj = 1 * x^T  (each column is x).
-    matrix_mul(&x_col, &ones_row, &xi, use_gpu);  // xi[i,j] = x_i
-    matrix_mul(&ones_col, &x_row, &xj, use_gpu);  // xj[i,j] = x_j
-    matrix_sub(&xj, &xi, &dx, use_gpu);           // ΔX[i,j] = x_j - x_i
+    // Broadcast each coordinate into N×N matrices, then subtract to get
+    // ΔX/ΔY/ΔZ. xi = x * 1^T  (each row is x^T),  xj = 1 * x^T  (each column is
+    // x).
+    matrix_mul(&x_col, &ones_row, &xi, use_gpu); // xi[i,j] = x_i
+    matrix_mul(&ones_col, &x_row, &xj, use_gpu); // xj[i,j] = x_j
+    matrix_sub(&xj, &xi, &dx, use_gpu);          // ΔX[i,j] = x_j - x_i
 
     matrix_mul(&y_col, &ones_row, &yi, use_gpu);
     matrix_mul(&ones_col, &y_row, &yj, use_gpu);
-    matrix_sub(&yj, &yi, &dy, use_gpu);           // ΔY[i,j] = y_j - y_i
+    matrix_sub(&yj, &yi, &dy, use_gpu); // ΔY[i,j] = y_j - y_i
 
     matrix_mul(&z_col, &ones_row, &zi, use_gpu);
     matrix_mul(&ones_col, &z_row, &zj, use_gpu);
-    matrix_sub(&zj, &zi, &dz, use_gpu);           // ΔZ[i,j] = z_j - z_i
+    matrix_sub(&zj, &zi, &dz, use_gpu); // ΔZ[i,j] = z_j - z_i
 
-    free(x_data);  free(y_data);  free(z_data);  free(ones_data);
-    free(xi_data); free(xj_data);
-    free(yi_data); free(yj_data);
-    free(zi_data); free(zj_data);
+    free(x_data);
+    free(y_data);
+    free(z_data);
+    free(ones_data);
+    free(xi_data);
+    free(xj_data);
+    free(yi_data);
+    free(yj_data);
+    free(zi_data);
+    free(zj_data);
 
     *dx_out = dx_data;
     *dy_out = dy_data;
@@ -142,8 +152,11 @@ static void compute_displacements(const PhysicsObject *objects, int count, bool 
  *                   force magnitude between every pair of bodies.
  * @param use_gpu    If true, use the CUDA backend; otherwise Fortran.
  */
-static void newtonian_gravity_forces(const PhysicsObject *objects, int count, double *force_data, bool use_gpu,
-                                     const double *dx_data, const double *dy_data, const double *dz_data) {
+static void newtonian_gravity_forces(const PhysicsObject *objects, int count,
+                                     double *force_data, bool use_gpu,
+                                     const double *dx_data,
+                                     const double *dy_data,
+                                     const double *dz_data) {
 
     // ── Step 1: mass product  m_n × m_n^T  (N×N) ────────────────────────────
     // Produces mass_prod[i,j] = m_i * m_j for every body pair.
@@ -155,11 +168,11 @@ static void newtonian_gravity_forces(const PhysicsObject *objects, int count, do
         row_data[i] = objects[i].mass;
     }
 
-    Matrix mass_col = { .rows = count, .cols = 1, .data = col_data }; // Nx1
-    Matrix mass_row = { .rows = 1, .cols = count, .data = row_data }; // 1xN
+    Matrix mass_col = {.rows = count, .cols = 1, .data = col_data}; // Nx1
+    Matrix mass_row = {.rows = 1, .cols = count, .data = row_data}; // 1xN
 
     double *prod_data = calloc(count * count, sizeof(double));
-    Matrix mass_prod = { .rows = count, .cols = count, .data = prod_data }; // NxN
+    Matrix mass_prod = {.rows = count, .cols = count, .data = prod_data}; // NxN
 
     matrix_mul(&mass_col, &mass_row, &mass_prod, use_gpu);
 
@@ -171,27 +184,29 @@ static void newtonian_gravity_forces(const PhysicsObject *objects, int count, do
     double *dy_s_data = calloc(count * count, sizeof(double));
     double *dz_s_data = calloc(count * count, sizeof(double));
 
-    Matrix dx = { count, count, (double *)dx_data };
-    Matrix dy = { count, count, (double *)dy_data };
-    Matrix dz = { count, count, (double *)dz_data };
-    Matrix dx_s = { count, count, dx_s_data };
-    Matrix dy_s = { count, count, dy_s_data };
-    Matrix dz_s = { count, count, dz_s_data };
+    Matrix dx = {count, count, (double *)dx_data};
+    Matrix dy = {count, count, (double *)dy_data};
+    Matrix dz = {count, count, (double *)dz_data};
+    Matrix dx_s = {count, count, dx_s_data};
+    Matrix dy_s = {count, count, dy_s_data};
+    Matrix dz_s = {count, count, dz_s_data};
 
     matrix_power(&dx, &power, &dx_s, use_gpu);
     matrix_power(&dy, &power, &dy_s, use_gpu);
     matrix_power(&dz, &power, &dz_s, use_gpu);
 
     double *xy_dist_data = calloc(count * count, sizeof(double));
-    double *dist_data    = calloc(count * count, sizeof(double));
+    double *dist_data = calloc(count * count, sizeof(double));
 
-    Matrix xy_dist  = { count, count, xy_dist_data };
-    Matrix distances = { count, count, dist_data };
+    Matrix xy_dist = {count, count, xy_dist_data};
+    Matrix distances = {count, count, dist_data};
 
     matrix_add(&dx_s, &dy_s, &xy_dist, use_gpu);
     matrix_add(&xy_dist, &dz_s, &distances, use_gpu);
 
-    free(dx_s_data); free(dy_s_data); free(dz_s_data);
+    free(dx_s_data);
+    free(dy_s_data);
+    free(dz_s_data);
     free(xy_dist_data);
 
     // ── Step 3: numerical safety  r²_safe = r² + I ──────────────────────────
@@ -201,10 +216,10 @@ static void newtonian_gravity_forces(const PhysicsObject *objects, int count, do
     for (int i = 0; i < count; i++) {
         identity_data[i * count + i] = 1.0;
     }
-    Matrix identity = { count, count, identity_data };
+    Matrix identity = {count, count, identity_data};
 
     double *safe_dist_data = calloc(count * count, sizeof(double));
-    Matrix safe_distances = { count, count, safe_dist_data };
+    Matrix safe_distances = {count, count, safe_dist_data};
 
     matrix_add(&distances, &identity, &safe_distances, use_gpu);
 
@@ -213,14 +228,14 @@ static void newtonian_gravity_forces(const PhysicsObject *objects, int count, do
 
     // ── Step 4: (m_n × m_n^T) ⊘ r²_safe, then scale by G ───────────────────
     double *mass_dist_data = calloc(count * count, sizeof(double));
-    Matrix mass_distance = { count, count, mass_dist_data };
+    Matrix mass_distance = {count, count, mass_dist_data};
 
     matrix_div(&mass_prod, &safe_distances, &mass_distance, use_gpu);
 
     free(prod_data);
     free(safe_dist_data);
 
-    Matrix forces = { count, count, force_data };
+    Matrix forces = {count, count, force_data};
     matrix_scalar_mul(&mass_distance, &g, &forces, use_gpu);
     free(mass_dist_data);
 
@@ -249,35 +264,39 @@ static void newtonian_gravity_forces(const PhysicsObject *objects, int count, do
  *                   that will receive the unit direction vectors.
  * @param use_gpu    If true, use the CUDA backend; otherwise Fortran.
  */
-static void newtonian_gravity_directions(int count, Matrix3 *directions, bool use_gpu,
-                                         const double *dx_data, const double *dy_data, const double *dz_data) {
+static void newtonian_gravity_directions(int count, Matrix3 *directions,
+                                         bool use_gpu, const double *dx_data,
+                                         const double *dy_data,
+                                         const double *dz_data) {
 
     // ── Step 1: squared distances  r²[i,j] = ΔX² + ΔY² + ΔZ²  (N×N) ───────
     double *dx_s_data = calloc(count * count, sizeof(double));
     double *dy_s_data = calloc(count * count, sizeof(double));
     double *dz_s_data = calloc(count * count, sizeof(double));
 
-    Matrix dx = { count, count, (double *)dx_data };
-    Matrix dy = { count, count, (double *)dy_data };
-    Matrix dz = { count, count, (double *)dz_data };
-    Matrix dx_s = { count, count, dx_s_data };
-    Matrix dy_s = { count, count, dy_s_data };
-    Matrix dz_s = { count, count, dz_s_data };
+    Matrix dx = {count, count, (double *)dx_data};
+    Matrix dy = {count, count, (double *)dy_data};
+    Matrix dz = {count, count, (double *)dz_data};
+    Matrix dx_s = {count, count, dx_s_data};
+    Matrix dy_s = {count, count, dy_s_data};
+    Matrix dz_s = {count, count, dz_s_data};
 
     matrix_power(&dx, &power, &dx_s, use_gpu);
     matrix_power(&dy, &power, &dy_s, use_gpu);
     matrix_power(&dz, &power, &dz_s, use_gpu);
 
     double *xy_dist_data = calloc(count * count, sizeof(double));
-    double *dist_data    = calloc(count * count, sizeof(double));
+    double *dist_data = calloc(count * count, sizeof(double));
 
-    Matrix xy_dist   = { count, count, xy_dist_data };
-    Matrix distances = { count, count, dist_data };
+    Matrix xy_dist = {count, count, xy_dist_data};
+    Matrix distances = {count, count, dist_data};
 
     matrix_add(&dx_s, &dy_s, &xy_dist, use_gpu);
     matrix_add(&xy_dist, &dz_s, &distances, use_gpu);
 
-    free(dx_s_data); free(dy_s_data); free(dz_s_data);
+    free(dx_s_data);
+    free(dy_s_data);
+    free(dz_s_data);
     free(xy_dist_data);
 
     // ── Step 3: numerical safety  r²_safe = r² + I ──────────────────────────
@@ -285,10 +304,10 @@ static void newtonian_gravity_directions(int count, Matrix3 *directions, bool us
     for (int i = 0; i < count; i++) {
         identity_data[i * count + i] = 1.0;
     }
-    Matrix identity = { count, count, identity_data };
+    Matrix identity = {count, count, identity_data};
 
     double *safe_dist_data = calloc(count * count, sizeof(double));
-    Matrix safe_dist = { count, count, safe_dist_data };
+    Matrix safe_dist = {count, count, safe_dist_data};
 
     matrix_add(&distances, &identity, &safe_dist, use_gpu);
     free(identity_data);
@@ -296,7 +315,7 @@ static void newtonian_gravity_directions(int count, Matrix3 *directions, bool us
 
     // ── Step 4: r = sqrt(r²_safe),  then D_hat[i,j] = D[i,j] / r[i,j] ──────
     double *r_data = calloc(count * count, sizeof(double));
-    Matrix r_mat = { count, count, r_data };
+    Matrix r_mat = {count, count, r_data};
 
     matrix_power(&safe_dist, &half, &r_mat, use_gpu);
     free(safe_dist_data);
@@ -317,11 +336,13 @@ void newtonian_gravity(const PhysicsObject *objects, int count,
 
     // ── Shared: displacement matrices ΔX, ΔY, ΔZ used by both stages ─────────
     double *dx_data, *dy_data, *dz_data;
-    compute_displacements(objects, count, use_gpu, &dx_data, &dy_data, &dz_data);
+    compute_displacements(objects, count, use_gpu, &dx_data, &dy_data,
+                          &dz_data);
 
     // ── Stage 1: scalar force magnitudes  F[i,j]  (N×N) ─────────────────────
     double *force_data = calloc(count * count, sizeof(double));
-    newtonian_gravity_forces(objects, count, force_data, use_gpu, dx_data, dy_data, dz_data);
+    newtonian_gravity_forces(objects, count, force_data, use_gpu, dx_data,
+                             dy_data, dz_data);
 
     // ── Stage 2: unit direction tensor  D_hat[i,j]  (N×N×3) ─────────────────
     double *dir_x_data = calloc(count * count, sizeof(double));
@@ -329,46 +350,53 @@ void newtonian_gravity(const PhysicsObject *objects, int count,
     double *dir_z_data = calloc(count * count, sizeof(double));
 
     Matrix3 directions = {
-        .x = { count, count, dir_x_data },
-        .y = { count, count, dir_y_data },
-        .z = { count, count, dir_z_data },
+        .x = {count, count, dir_x_data},
+        .y = {count, count, dir_y_data},
+        .z = {count, count, dir_z_data},
     };
 
-    newtonian_gravity_directions(count, &directions, use_gpu, dx_data, dy_data, dz_data);
-    free(dx_data); free(dy_data); free(dz_data);
+    newtonian_gravity_directions(count, &directions, use_gpu, dx_data, dy_data,
+                                 dz_data);
+    free(dx_data);
+    free(dy_data);
+    free(dz_data);
 
     // ── Stage 3: F_vec[i,j] = F[i,j] ⊙ D_hat[i,j]  (Hadamard per component) ─
-    Matrix forces = { count, count, force_data };
+    Matrix forces = {count, count, force_data};
 
     double *fvec_x_data = calloc(count * count, sizeof(double));
     double *fvec_y_data = calloc(count * count, sizeof(double));
     double *fvec_z_data = calloc(count * count, sizeof(double));
 
-    Matrix fvec_x = { count, count, fvec_x_data };
-    Matrix fvec_y = { count, count, fvec_y_data };
-    Matrix fvec_z = { count, count, fvec_z_data };
+    Matrix fvec_x = {count, count, fvec_x_data};
+    Matrix fvec_y = {count, count, fvec_y_data};
+    Matrix fvec_z = {count, count, fvec_z_data};
 
     matrix_hadamard(&forces, &directions.x, &fvec_x, use_gpu);
     matrix_hadamard(&forces, &directions.y, &fvec_y, use_gpu);
     matrix_hadamard(&forces, &directions.z, &fvec_z, use_gpu);
 
     free(force_data);
-    free(dir_x_data); free(dir_y_data); free(dir_z_data);
+    free(dir_x_data);
+    free(dir_y_data);
+    free(dir_z_data);
 
     // ── Stage 4: F(i) = Σ_j F_vec[i,j]  (row sum → net force per body) ──────
     double *sum_x_data = calloc(count, sizeof(double));
     double *sum_y_data = calloc(count, sizeof(double));
     double *sum_z_data = calloc(count, sizeof(double));
 
-    Matrix sum_x = { count, 1, sum_x_data };
-    Matrix sum_y = { count, 1, sum_y_data };
-    Matrix sum_z = { count, 1, sum_z_data };
+    Matrix sum_x = {count, 1, sum_x_data};
+    Matrix sum_y = {count, 1, sum_y_data};
+    Matrix sum_z = {count, 1, sum_z_data};
 
     matrix_row_sum(&fvec_x, &sum_x, use_gpu);
     matrix_row_sum(&fvec_y, &sum_y, use_gpu);
     matrix_row_sum(&fvec_z, &sum_z, use_gpu);
 
-    free(fvec_x_data); free(fvec_y_data); free(fvec_z_data);
+    free(fvec_x_data);
+    free(fvec_y_data);
+    free(fvec_z_data);
 
     for (int i = 0; i < count; i++) {
         forces_out[i].x = sum_x_data[i];

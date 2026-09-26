@@ -16,7 +16,7 @@ extern "C" {
 
 /** Maximum vertices and triangular faces per convex mesh. */
 #define PHYS_MAX_VERTICES 64
-#define PHYS_MAX_FACES    32
+#define PHYS_MAX_FACES 32
 
 /**
  * @brief A rigid body with mass, kinematics, an accumulated net force, and
@@ -38,12 +38,15 @@ typedef struct {
     Vec3 force;        /**< Accumulated net force; reset to zero by step(). */
 
     /* --- Convex mesh geometry (local space) --- */
-    int  vertex_count; /**< Number of valid entries in local_verts (0 = no mesh). */
-    int  _pad0;        /**< Alignment padding — do not use. */
-    Vec3 local_verts[PHYS_MAX_VERTICES]; /**< Vertex positions in local space. */
-    int  face_count;   /**< Number of valid triangles in face_indices. */
-    int  _pad1;        /**< Alignment padding — do not use. */
-    int  face_indices[PHYS_MAX_FACES][3]; /**< Vertex index triples, CCW winding. */
+    int vertex_count; /**< Number of valid entries in local_verts (0 = no mesh).
+                       */
+    int _pad0;        /**< Alignment padding — do not use. */
+    Vec3
+        local_verts[PHYS_MAX_VERTICES]; /**< Vertex positions in local space. */
+    int face_count; /**< Number of valid triangles in face_indices. */
+    int _pad1;      /**< Alignment padding — do not use. */
+    int face_indices[PHYS_MAX_FACES]
+                    [3]; /**< Vertex index triples, CCW winding. */
 } PhysicsObject;
 
 /**

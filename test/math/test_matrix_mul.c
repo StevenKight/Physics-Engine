@@ -1,6 +1,7 @@
 /**
  * @file test_matrix_mul.c
- * @brief Unit tests for matrix multiplication (CPU/Fortran and GPU/CUDA backends).
+ * @brief Unit tests for matrix multiplication (CPU/Fortran and GPU/CUDA
+ * backends).
  *
  * @author Steven Kight
  * @date 2026-04-09

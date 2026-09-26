@@ -40,7 +40,8 @@ extern "C" {
  *                    0 = perfectly inelastic (objects stick together).
  *                    1 = elastic (no kinetic energy lost).
  */
-void inelastic_collision(PhysicsObject *a, PhysicsObject *b, double restitution);
+void inelastic_collision(PhysicsObject *a, PhysicsObject *b,
+                         double restitution);
 
 #ifdef __cplusplus
 }

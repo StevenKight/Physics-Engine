@@ -23,11 +23,12 @@ extern "C" {
  * @brief Computes the net Newtonian gravitational force vector on each body.
  *
  * Combines scalar force magnitudes with unit direction vectors per pair,
- * then row-sums to accumulate the net force on each body (see §Multi-Body Case):
+ * then row-sums to accumulate the net force on each body (see §Multi-Body
+ * Case):
  *
- *   Stage 1 — scalar magnitudes:  F[i,j]     = G(m_i m_j) / r²_safe        (N×N)
- *   Stage 2 — unit directions:    D_hat[i,j] = ΔP[i,j] / r[i,j]            (N×N×3)
- *   Stage 3 — force vectors:      F_vec[i,j] = F[i,j] ⊙ D_hat[i,j]         (N×N×3)
+ *   Stage 1 — scalar magnitudes:  F[i,j]     = G(m_i m_j) / r²_safe (N×N) Stage
+ * 2 — unit directions:    D_hat[i,j] = ΔP[i,j] / r[i,j]            (N×N×3)
+ *   Stage 3 — force vectors:      F_vec[i,j] = F[i,j] ⊙ D_hat[i,j] (N×N×3)
  *   Stage 4 — net per body:       F(i)       = Σ_j F_vec[i,j]
  *
  * @param objects    Pointer to an array of PhysicsObject. Must not be NULL.

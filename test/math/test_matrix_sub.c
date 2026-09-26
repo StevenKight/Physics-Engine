@@ -12,9 +12,9 @@
 
 static char *test_sub_cpu() {
     int n = 2, m = 2;
-    double A[4] = {1.0,  3.0,  2.0,  4.0};
-    double B[4] = {5.0,  8.0,  8.0, 11.0};
-    double C[4] = {0.0,  0.0,  0.0,  0.0};
+    double A[4] = {1.0, 3.0, 2.0, 4.0};
+    double B[4] = {5.0, 8.0, 8.0, 11.0};
+    double C[4] = {0.0, 0.0, 0.0, 0.0};
 
     Matrix A_mat = {n, m, A};
     Matrix B_mat = {n, m, B};
@@ -32,9 +32,9 @@ static char *test_sub_cpu() {
 
 static char *test_sub_gpu() {
     int n = 2, m = 2;
-    double A[4] = {1.0,  3.0,  2.0,  4.0};
-    double B[4] = {5.0,  8.0,  8.0, 11.0};
-    double C[4] = {0.0,  0.0,  0.0,  0.0};
+    double A[4] = {1.0, 3.0, 2.0, 4.0};
+    double B[4] = {5.0, 8.0, 8.0, 11.0};
+    double C[4] = {0.0, 0.0, 0.0, 0.0};
 
     Matrix A_mat = {n, m, A};
     Matrix B_mat = {n, m, B};
