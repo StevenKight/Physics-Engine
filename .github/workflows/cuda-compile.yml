@@ -1,0 +1,32 @@
+name: cuda-compile-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  cuda-build:
+    runs-on: ubuntu-latest
+    container: nvidia/cuda:12.4.1-devel-ubuntu22.04
+    steps:
+      # actions/checkout needs the git CLI, which the base image doesn't
+      # ship. Install it before checkout runs.
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends git ca-certificates
+
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: apt-get install -y --no-install-recommends cmake gfortran build-essential
+
+      # Compile-only: the container has nvcc but no GPU, so we configure and
+      # build (verifying every CUDA translation unit compiles/links) without
+      # running ctest. build-test.yml covers actually running the suite.
+      - name: Configure
+        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES=all-major
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"

@@ -1,0 +1,34 @@
+name: build-and-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Free runners have no GPU, so this only ever exercises the CPU/Fortran
+      # matrix backend and the non-CUDA logic/model code at runtime. The CUDA
+      # sources still need to compile (CMakeLists.txt requires the CUDA
+      # language unconditionally), so nvcc is installed too, but no kernel
+      # actually runs here — see cuda-compile.yml for the dedicated CUDA
+      # compile check and README/CONTRIBUTING for why the math tests skip
+      # their GPU half in this environment.
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            nvidia-cuda-toolkit gfortran cmake
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_CUDA_ARCHITECTURES=all-major
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

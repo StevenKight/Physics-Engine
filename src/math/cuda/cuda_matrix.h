@@ -27,6 +27,18 @@ extern "C" {
 
 #include "../matrix.h"
 
+/**
+ * @brief Check whether a usable CUDA device is present at runtime.
+ *
+ * The other functions in this header don't check CUDA runtime error codes,
+ * so on a machine with no GPU (e.g. most CI runners) they silently no-op
+ * instead of failing loudly. Callers that need to skip GPU-only work in
+ * that environment (tests, adaptive dispatch) should check this first.
+ *
+ * @return true if at least one CUDA-capable device is available.
+ */
+bool cuda_device_available(void);
+
 /* CUDA matrix operations (device and host callable) */
 /**
  * @brief Element-wise addition: result = a + b

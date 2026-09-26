@@ -6,6 +6,13 @@
 
 extern int tests_run;
 
+/* Sentinel returned by a test function to mark it skipped rather than
+ * passed/failed (e.g. a GPU test with no CUDA device present). Compared
+ * by pointer identity against this dedicated object, not string content
+ * (comparing == against a string literal is unspecified behavior). */
+char mu_skip_marker;
+#define MU_SKIP (&mu_skip_marker)
+
 #define mu_assert(message, test)                                               \
     do {                                                                       \
         if (!(test))                                                           \

@@ -11,7 +11,13 @@ set(CMAKE_Fortran_STANDARD_REQUIRED ON)
 
 set(CMAKE_CUDA_STANDARD 14)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
-set(CMAKE_CUDA_ARCHITECTURES "native")
+
+# "native" queries the physical GPU present on the machine, which CI runners
+# don't have. Only default to it when nothing was passed on the command line
+# (e.g. `-DCMAKE_CUDA_ARCHITECTURES=all-major` for a GPU-less build).
+if(NOT CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES "native")
+endif()
 
 find_package(OpenMP REQUIRED)
 

@@ -7,6 +7,7 @@
  * @date 2026-04-09
  */
 
+#include "cuda/cuda_matrix.h"
 #include "matrix.h"
 #include "test_runner.h"
 #include <stdio.h>
@@ -33,6 +34,9 @@ static char *test_power_square_cpu() {
 }
 
 static char *test_power_square_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 2.0, 3.0, 4.0};
     double power = 2.0;
@@ -73,6 +77,9 @@ static char *test_power_cube_cpu() {
 }
 
 static char *test_power_cube_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 2.0, 3.0, 4.0};
     double power = 3.0;
@@ -113,6 +120,9 @@ static char *test_power_sqrt_cpu() {
 }
 
 static char *test_power_sqrt_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 4.0, 9.0, 16.0};
     double power = 0.5;

@@ -48,7 +48,9 @@ static inline int run_suite(const char *suite_name, const TestCase *tests,
     for (int i = 0; i < count; i++) {
         char *result = tests[i].fn();
         tests_run++;
-        if (result) {
+        if (result == MU_SKIP) {
+            printf("  SKIP [%s]\n", tests[i].name);
+        } else if (result) {
             printf("  FAIL [%s]: %s\n", tests[i].name, result);
             failed++;
         } else {

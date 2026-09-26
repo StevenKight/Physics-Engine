@@ -10,6 +10,7 @@
  * @date 2025-10-09
  */
 
+#include "cuda_device.cu"
 #include "matrix_add.cu"
 #include "matrix_div.cu"
 #include "matrix_hadamard.cu"

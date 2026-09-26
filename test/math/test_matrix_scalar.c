@@ -7,6 +7,7 @@
  * @date 2026-04-09
  */
 
+#include "cuda/cuda_matrix.h"
 #include "matrix.h"
 #include "test_runner.h"
 #include <stdio.h>
@@ -33,6 +34,9 @@ static char *test_scalar_mul_cpu() {
 }
 
 static char *test_scalar_mul_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 3.0, 2.0, 4.0};
     double scalar = 2.0;
@@ -73,6 +77,9 @@ static char *test_scalar_div_cpu() {
 }
 
 static char *test_scalar_div_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {2.0, 6.0, 4.0, 8.0};
     double scalar = 2.0;
@@ -113,6 +120,9 @@ static char *test_scalar_add_cpu() {
 }
 
 static char *test_scalar_add_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 3.0, 2.0, 4.0};
     double scalar = 1.0;
@@ -153,6 +163,9 @@ static char *test_scalar_sub_cpu() {
 }
 
 static char *test_scalar_sub_gpu() {
+    if (!cuda_device_available())
+        return MU_SKIP;
+
     int n = 2, m = 2;
     double A[4] = {1.0, 3.0, 2.0, 4.0};
     double scalar = 1.0;
