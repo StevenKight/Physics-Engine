@@ -25,7 +25,12 @@ const double g = 6.67430e-11;
 // CUDA (GPU) backend is used. Tune by benchmarking newtonian_gravity() around
 // the boundary on target hardware — CUDA overhead (~26 ops × H↔D transfer per
 // call) dominates for small N where each N×N matrix is tiny.
-static const int GRAVITY_GPU_THRESHOLD = 64;
+//
+// Can be overridden at compile time (-DGRAVITY_GPU_THRESHOLD=...) to force a
+// backend, e.g. 0 for always CUDA or INT_MAX for always Fortran.
+#ifndef GRAVITY_GPU_THRESHOLD
+#define GRAVITY_GPU_THRESHOLD 64
+#endif
 
 // Returns true if the CUDA backend should be used for an N-body gravity
 // calculation. When USE_CUDA is not defined this always returns false.
