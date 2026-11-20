@@ -61,16 +61,36 @@ typedef struct {
 void object_init(PhysicsObject *obj, double mass, double x, double y, double z);
 
 /**
- * @brief Advance @p obj by one time step using Velocity Verlet integration.
+ * @brief First half of a Velocity Verlet step: half-step velocity, then move.
  *
- * All forces must be accumulated into @c obj->force before this is called.
- * On return, position, velocity, and acceleration are updated and @c obj->force
- * is reset to zero.
+ * Uses the acceleration already stored on the object (a_t):
+ *
+ *   v_{t+dt/2} = v_t + (1/2) * a_t * dt
+ *   x_{t+dt}   = x_t + v_{t+dt/2} * dt
+ *
+ * Forces for the new position must then be accumulated into @c obj->force
+ * before calling object_update_velocity().
  *
  * @param obj        Pointer to the object to advance.
  * @param time_step  Duration of the time step (s).
  */
-void object_step(PhysicsObject *obj, double time_step);
+void object_update_position(PhysicsObject *obj, double time_step);
+
+/**
+ * @brief Second half of a Velocity Verlet step: finish the velocity update.
+ *
+ * Takes the force accumulated at the new position:
+ *
+ *   a_{t+dt} = F_net / m
+ *   v_{t+dt} = v_{t+dt/2} + (1/2) * a_{t+dt} * dt
+ *
+ * On return @c obj->acceleration holds a_{t+dt} for the next step and
+ * @c obj->force is reset to zero.
+ *
+ * @param obj        Pointer to the object to advance.
+ * @param time_step  Duration of the time step (s).
+ */
+void object_update_velocity(PhysicsObject *obj, double time_step);
 
 #ifdef __cplusplus
 }

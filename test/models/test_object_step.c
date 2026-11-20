@@ -1,11 +1,15 @@
 /**
  * @file test_object_step.c
- * @brief Unit tests for the step() function (Velocity Verlet Integration).
+ * @brief Unit tests for the Velocity Verlet step (object_update_position and
+ *        object_update_velocity).
  *
  * Tests cover: object at rest with no force, uniform motion (no force),
- * first step from rest under constant force, subsequent step with prior
- * acceleration, and force accumulator reset after each step. Also checks
- * that object_init() leaves no stale collision mesh behind.
+ * first and second steps under a constant force, and force accumulator reset
+ * after each step. Also checks that object_init() leaves no stale collision
+ * mesh behind.
+ *
+ * Velocity Verlet is exact for a constant force, so the constant-force tests
+ * compare against the analytic x = x0 + v0*t + a*t^2/2 and v = v0 + a*t.
  *
  * @author Steven Kight
  * @date 2026-04-10
@@ -15,6 +19,17 @@
 #include "test_runner.h"
 
 #include <string.h>
+
+/**
+ * One full step the way sim_run() does it: move using the stored
+ * acceleration, apply the force at the new position, then finish the
+ * velocity update.
+ */
+static void full_step(PhysicsObject *obj, Vec3 force, double time_step) {
+    object_update_position(obj, time_step);
+    obj->force = force;
+    object_update_velocity(obj, time_step);
+}
 
 /**
  * object_init() must clear the mesh counts. Objects are often declared on the
@@ -46,7 +61,7 @@ static char *test_rest_no_force() {
         .force = {0.0, 0.0, 0.0},
     };
 
-    object_step(&obj, 1.0);
+    full_step(&obj, (Vec3){0.0, 0.0, 0.0}, 1.0);
 
     mu_assert_double_eq("rest: pos.x != 0", obj.position.x, 0.0, 1e-15);
     mu_assert_double_eq("rest: pos.y != 0", obj.position.y, 0.0, 1e-15);
@@ -73,7 +88,7 @@ static char *test_uniform_motion() {
         .force = {0.0, 0.0, 0.0},
     };
 
-    object_step(&obj, 0.5);
+    full_step(&obj, (Vec3){0.0, 0.0, 0.0}, 0.5);
 
     mu_assert_double_eq("uniform: pos.x != 3", obj.position.x, 3.0, 1e-15);
     mu_assert_double_eq("uniform: pos.y != 4.5", obj.position.y, 4.5, 1e-15);
@@ -87,29 +102,31 @@ static char *test_uniform_motion() {
 /**
  * First step from rest under a constant x-axis force.
  *
- * With zero initial velocity and acceleration, the position formula gives
- * x_{t+dt} = 0 (both v_t and a_t are zero). Velocity picks up half the new
- * acceleration because the Verlet average is (a_t + a_{t+dt}) / 2 = (0 + 2)
- * / 2.
+ * The starting acceleration is already set (sim_run computes it from the
+ * initial positions before the first tick).
  *
- * Initial: mass=2, pos=0, vel=0, acc=0, force=(4,0,0), dt=1
- * Expected: pos=(0,0,0), vel=(1,0,0), acc=(2,0,0)
+ *   v_half = 0 + 2/2 * 1 = 1
+ *   x      = 0 + 1 * 1   = 1     (exact: a*t^2/2 = 1)
+ *   v      = 1 + 2/2 * 1 = 2     (exact: a*t     = 2)
+ *
+ * Initial: mass=2, pos=0, vel=0, acc=(2,0,0), force=(4,0,0), dt=1
+ * Expected: pos=(1,0,0), vel=(2,0,0), acc=(2,0,0)
  */
 static char *test_constant_force_first_step() {
     PhysicsObject obj = {
         .mass = 2.0,
         .position = {0.0, 0.0, 0.0},
         .velocity = {0.0, 0.0, 0.0},
-        .acceleration = {0.0, 0.0, 0.0},
-        .force = {4.0, 0.0, 0.0},
+        .acceleration = {2.0, 0.0, 0.0},
+        .force = {0.0, 0.0, 0.0},
     };
 
-    object_step(&obj, 1.0);
+    full_step(&obj, (Vec3){4.0, 0.0, 0.0}, 1.0);
 
-    mu_assert_double_eq("1st step: pos.x != 0", obj.position.x, 0.0, 1e-15);
+    mu_assert_double_eq("1st step: pos.x != 1", obj.position.x, 1.0, 1e-15);
     mu_assert_double_eq("1st step: pos.y != 0", obj.position.y, 0.0, 1e-15);
     mu_assert_double_eq("1st step: pos.z != 0", obj.position.z, 0.0, 1e-15);
-    mu_assert_double_eq("1st step: vel.x != 1", obj.velocity.x, 1.0, 1e-15);
+    mu_assert_double_eq("1st step: vel.x != 2", obj.velocity.x, 2.0, 1e-15);
     mu_assert_double_eq("1st step: vel.y != 0", obj.velocity.y, 0.0, 1e-15);
     mu_assert_double_eq("1st step: vel.z != 0", obj.velocity.z, 0.0, 1e-15);
     mu_assert_double_eq("1st step: acc.x != 2", obj.acceleration.x, 2.0, 1e-15);
@@ -117,40 +134,38 @@ static char *test_constant_force_first_step() {
 }
 
 /**
- * Subsequent step with prior acceleration already set (simulates a second
- * step).
+ * Second step, continuing from the state after the first.
  *
- * This exercises the Verlet average: (a_t + a_{t+dt}) / 2 = (2 + 2) / 2 = 2.
+ *   v_half = 2 + 2/2 * 1 = 3
+ *   x      = 1 + 3 * 1   = 4     (exact at t=2: a*t^2/2 = 4)
+ *   v      = 3 + 2/2 * 1 = 4     (exact at t=2: a*t     = 4)
  *
- * Initial: mass=2, pos=(0,0,0), vel=(1,0,0), acc=(2,0,0), force=(4,0,0), dt=1
- *   next_a   = 4/2 = 2
- *   next_vel = 1 + (2+2)/2 * 1 = 3
- *   next_pos = 0 + 1*1 + 2/2*1^2 = 2
- * Expected: pos=(2,0,0), vel=(3,0,0), acc=(2,0,0)
+ * Initial: mass=2, pos=(1,0,0), vel=(2,0,0), acc=(2,0,0), force=(4,0,0), dt=1
+ * Expected: pos=(4,0,0), vel=(4,0,0), acc=(2,0,0)
  */
 static char *test_constant_force_second_step() {
     PhysicsObject obj = {
         .mass = 2.0,
-        .position = {0.0, 0.0, 0.0},
-        .velocity = {1.0, 0.0, 0.0},
+        .position = {1.0, 0.0, 0.0},
+        .velocity = {2.0, 0.0, 0.0},
         .acceleration = {2.0, 0.0, 0.0},
-        .force = {4.0, 0.0, 0.0},
+        .force = {0.0, 0.0, 0.0},
     };
 
-    object_step(&obj, 1.0);
+    full_step(&obj, (Vec3){4.0, 0.0, 0.0}, 1.0);
 
-    mu_assert_double_eq("2nd step: pos.x != 2", obj.position.x, 2.0, 1e-15);
+    mu_assert_double_eq("2nd step: pos.x != 4", obj.position.x, 4.0, 1e-15);
     mu_assert_double_eq("2nd step: pos.y != 0", obj.position.y, 0.0, 1e-15);
     mu_assert_double_eq("2nd step: pos.z != 0", obj.position.z, 0.0, 1e-15);
-    mu_assert_double_eq("2nd step: vel.x != 3", obj.velocity.x, 3.0, 1e-15);
+    mu_assert_double_eq("2nd step: vel.x != 4", obj.velocity.x, 4.0, 1e-15);
     mu_assert_double_eq("2nd step: vel.y != 0", obj.velocity.y, 0.0, 1e-15);
     mu_assert_double_eq("2nd step: vel.z != 0", obj.velocity.z, 0.0, 1e-15);
     return NULL;
 }
 
 /**
- * After every step(), the force accumulator must be zeroed so the next
- * round of force additions starts from a clean slate.
+ * After every object_update_velocity(), the force accumulator must be zeroed
+ * so the next round of force additions starts from a clean slate.
  */
 static char *test_force_reset() {
     PhysicsObject obj = {
@@ -158,10 +173,10 @@ static char *test_force_reset() {
         .position = {0.0, 0.0, 0.0},
         .velocity = {0.0, 0.0, 0.0},
         .acceleration = {0.0, 0.0, 0.0},
-        .force = {3.0, 5.0, 7.0},
+        .force = {0.0, 0.0, 0.0},
     };
 
-    object_step(&obj, 1.0);
+    full_step(&obj, (Vec3){3.0, 5.0, 7.0}, 1.0);
 
     mu_assert_double_eq("force reset: force.x != 0", obj.force.x, 0.0, 1e-15);
     mu_assert_double_eq("force reset: force.y != 0", obj.force.y, 0.0, 1e-15);

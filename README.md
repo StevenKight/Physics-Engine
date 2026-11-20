@@ -22,7 +22,7 @@ C/C++ ties it all together and handles the core simulation logic.
 
 - CMake build system configured for all three languages compiling together; `Makefile` wraps common workflows (`build`, `test`, `package`, `clean`)
 - Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
-- `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_step`)
+- `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_update_position` / `object_update_velocity`)
 - Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
 - Two-phase collision detection: octree broad phase (AABB overlap) + SAT narrow phase (convex meshes; parallelised with OpenMP)
 - Inelastic collision response with configurable coefficient of restitution applied along the collision normal

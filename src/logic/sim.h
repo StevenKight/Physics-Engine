@@ -22,8 +22,11 @@ extern "C" {
 /**
  * @brief Run the simulation for a fixed number of time steps.
  *
- * Runs gravity, collision detection (internally — pairs are not exposed to the
- * caller), and Velocity Verlet integration each tick.
+ * Each tick runs collision detection and response (internally — pairs are not
+ * exposed to the caller), then a Velocity Verlet step with gravity evaluated
+ * at the updated positions. Gravity is also evaluated once before the first
+ * tick to get the starting acceleration, so every call costs num_steps + 1
+ * gravity evaluations.
  *
  * Objects that have vertex/face geometry (vertex_count > 0) participate in
  * collision detection automatically. Objects without geometry are point masses
