@@ -32,6 +32,7 @@ set(SUBDIRECTORIES
     src/models          # Data models (physics objects, bodies, etc.)
     src/logic           # Physics logic (gravity, forces, etc.)
     test                # Unit tests
+    validation          # Analytic validation cases
 )
 
 # Include each subdirectory
