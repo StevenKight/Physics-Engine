@@ -33,6 +33,7 @@ set(SUBDIRECTORIES
     src/logic           # Physics logic (gravity, forces, etc.)
     test                # Unit tests
     validation          # Analytic validation cases
+    benchmarks          # Backend timing benchmarks
 )
 
 # Include each subdirectory
