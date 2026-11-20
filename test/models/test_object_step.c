@@ -4,7 +4,8 @@
  *
  * Tests cover: object at rest with no force, uniform motion (no force),
  * first step from rest under constant force, subsequent step with prior
- * acceleration, and force accumulator reset after each step.
+ * acceleration, and force accumulator reset after each step. Also checks
+ * that object_init() leaves no stale collision mesh behind.
  *
  * @author Steven Kight
  * @date 2026-04-10
@@ -12,6 +13,24 @@
 
 #include "object.h"
 #include "test_runner.h"
+
+#include <string.h>
+
+/**
+ * object_init() must clear the mesh counts. Objects are often declared on the
+ * stack, and leftover memory there would otherwise look like a huge mesh to
+ * collision detection.
+ */
+static char *test_init_clears_mesh() {
+    PhysicsObject obj;
+    memset(&obj, 0x5a, sizeof(obj));
+
+    object_init(&obj, 1.0, 0.0, 0.0, 0.0);
+
+    mu_assert("init: vertex_count != 0", obj.vertex_count == 0);
+    mu_assert("init: face_count != 0", obj.face_count == 0);
+    return NULL;
+}
 
 /**
  * An object at rest with no force applied must remain stationary.
@@ -151,6 +170,7 @@ static char *test_force_reset() {
 }
 
 static const TestCase tests[] = {
+    {"init_clears_mesh", test_init_clears_mesh},
     {"rest_no_force", test_rest_no_force},
     {"uniform_motion", test_uniform_motion},
     {"constant_force_first_step", test_constant_force_first_step},

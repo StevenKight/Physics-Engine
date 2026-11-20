@@ -28,6 +28,10 @@ void object_init(PhysicsObject *obj, double mass, double x, double y,
     obj->position.x = x;
     obj->position.y = y;
     obj->position.z = z;
+
+    // No collision mesh until one is attached
+    obj->vertex_count = 0;
+    obj->face_count = 0;
 }
 
 void object_step(PhysicsObject *obj, double time_step) {
