@@ -3,7 +3,7 @@
 # three backends into a timestamped CSV under benchmarks/results/.
 #
 # Run from anywhere: ./benchmarks/run.sh
-# Takes roughly an hour. Close other heavy programs first; the timings are
+# Takes about 40 minutes. Close other heavy programs first; the timings are
 # only meaningful on an otherwise idle machine.
 
 set -e
