@@ -1,0 +1,9 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+77.0,68456715,7,9779530.7,9716290.0,9713985,10162882,169046.2,"matrix_power_kernel(double *, double, double *, int, int)"
+6.7,5925889,6,987648.2,989280.5,978208,991008,4836.5,"matrix_add_kernel(double *, double *, double *, int, int)"
+4.4,3931776,4,982944.0,982304.0,979872,987296,3670.2,"matrix_div_kernel(double *, double *, double *, int, int)"
+3.3,2958657,3,986219.0,990272.0,977376,991009,7667.1,"matrix_hadamard_kernel(double *, double *, double *, int, int)"
+3.3,2948833,3,982944.3,982688.0,981729,984416,1361.7,"matrix_subtract_kernel(double *, double *, double *, int, int)"
+2.6,2327968,7,332566.9,322496.0,321376,358848,17646.1,"matrix_multiply_kernel(double *, int, int, double *, int, int, double *, int, int)"
+2.0,1748864,3,582954.7,582944.0,582880,583040,80.5,"matrix_row_sum_kernel(double *, double *, int, int)"
+0.7,659264,1,659264.0,659264.0,659264,659264,0.0,"matrix_scalar_multiply_kernel(double *, double, double *, int, int)"

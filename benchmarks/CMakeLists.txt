@@ -19,3 +19,12 @@ foreach(target bench_router bench_fortran bench_cuda)
     target_include_directories(${target} PRIVATE ${CMAKE_SOURCE_DIR}/src/logic)
     target_link_libraries(${target} PRIVATE logic_lib OpenMP::OpenMP_CXX)
 endforeach()
+
+# One CUDA gravity call inside a profiler capture range, for profile.sh.
+find_package(CUDAToolkit REQUIRED)
+add_executable(profile_gravity profile_gravity.cpp ${GRAVITY_SOURCE})
+target_compile_definitions(profile_gravity PRIVATE USE_CUDA
+    GRAVITY_GPU_THRESHOLD=0)
+target_include_directories(profile_gravity PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/logic)
+target_link_libraries(profile_gravity PRIVATE models_lib math_lib CUDA::cudart)
