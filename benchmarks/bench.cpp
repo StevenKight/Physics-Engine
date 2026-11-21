@@ -147,9 +147,11 @@ using MakeFn = std::function<std::vector<PhysicsObject>(int)>;
 using RunFn = std::function<void(std::vector<PhysicsObject> &)>;
 
 // Runs one scenario for N = 8, 16, ... until memory or time runs out. Each
-// run does `ticks` ticks of work; reported times are per tick.
+// run does `ticks` ticks of work; reported times are per tick. If `setup` is
+// given, its median time is taken off every run before dividing by `ticks`.
 static void sweep(const char *scenario, int threads, int ticks,
-                  const MakeFn &make, const RunFn &run) {
+                  const MakeFn &make, const RunFn &run,
+                  const RunFn &setup = nullptr) {
     omp_set_num_threads(threads);
 
     for (int n = 8; n <= MAX_N; n *= 2) {
@@ -163,10 +165,17 @@ static void sweep(const char *scenario, int threads, int ticks,
         std::vector<PhysicsObject> objects;
 
         Timing t = time_runs([&] { objects = start; }, [&] { run(objects); });
-        t = {t.median / ticks, t.min / ticks, t.max / ticks};
+        double longest_run = t.max;
+        double overhead = 0.0;
+        if (setup)
+            overhead =
+                time_runs([&] { objects = start; }, [&] { setup(objects); })
+                    .median;
+        t = {(t.median - overhead) / ticks, (t.min - overhead) / ticks,
+             (t.max - overhead) / ticks};
         write_row(scenario, threads, n, ticks, t, "");
 
-        if (t.max * ticks > TIME_LIMIT_MS) {
+        if (longest_run > TIME_LIMIT_MS) {
             write_row(scenario, threads, n * 2, ticks, {0, 0, 0},
                       "skipped: previous run over time limit");
             return;
@@ -196,6 +205,13 @@ int main(int argc, char **argv) {
         sim_run(o.data(), (int)o.size(), 1.0, SIM_TICKS);
     };
 
+    // sim_run() evaluates gravity once before its first tick. A run with zero
+    // ticks does only that, so its time is subtracted to get a true per-tick
+    // cost.
+    auto sim_setup = [](std::vector<PhysicsObject> &o) {
+        sim_run(o.data(), (int)o.size(), 1.0, 0);
+    };
+
     // The full tick depends on the gravity router, so only that build runs
     // it, single threaded and with every core.
     if (std::string(BENCH_BACKEND) == "router") {
@@ -203,10 +219,10 @@ int main(int argc, char **argv) {
         for (int threads : {1, cores}) {
             sweep(
                 "sim_sparse", threads, SIM_TICKS,
-                [](int n) { return make_boxes(n, 3.0); }, sim_ticks);
+                [](int n) { return make_boxes(n, 3.0); }, sim_ticks, sim_setup);
             sweep(
                 "sim_dense", threads, SIM_TICKS,
-                [](int n) { return make_boxes(n, 1.0); }, sim_ticks);
+                [](int n) { return make_boxes(n, 1.0); }, sim_ticks, sim_setup);
         }
     }
 
