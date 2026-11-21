@@ -63,9 +63,9 @@ Halving the time step cuts the orbit error by 3.98x, 4.00x and 4.00x, so the int
 
 Each backend is forced explicitly and timed over 10 runs after a warm-up ([benchmarks/CROSSOVER.md](benchmarks/CROSSOVER.md)):
 
-- CUDA first beats Fortran at **N = 256** and keeps winning at every larger N measured. The crossover is between 128 and 256 bodies (about 253 by log-log interpolation); at 256 the two are within each other's run-to-run spread.
-- The current 64-body threshold is **too low**. At N = 128 the router picks CUDA and takes 5.0 ms where Fortran takes 2.5 ms.
-- The best speedup is **1.65x at N = 1024** (RTX 3070 vs one Ryzen 7 5800X core; driver 580.196.07, CUDA 12.1, GCC 14.2, Linux 6.11).
+- CUDA first beats Fortran at **N = 256** and keeps winning at every larger N measured. The crossover is between 128 and 256 bodies (about 251 by log-log interpolation). At 256 the two are within each other's run-to-run spread (CUDA 10.1 ms, Fortran 10.3 ms), and an earlier run had CUDA slightly slower there, so treat 256 as the break-even point rather than a clear win.
+- The current 64-body threshold is **too low**. At N = 128 the router picks CUDA and takes 4.9 ms where Fortran takes 2.6 ms.
+- The best speedup is **1.59x at N = 1024** (RTX 3070 vs one Ryzen 7 5800X core; driver 580.196.07, CUDA 12.1, GCC 14.2, Linux 6.11).
 - The speedup stays small because the CUDA path copies every intermediate matrix to and from the GPU. Profiling one call at N = 4096 shows about 2.1 s in `cudaMemcpy` against 0.09 s in kernels, and the kernels themselves are limited by FP64 throughput ([benchmarks/PROFILE.md](benchmarks/PROFILE.md)).
 - Gravity uses about 12 N x N matrices at its peak, so runs stop at N = 8192; 16384 would need about 26 GB.
 
