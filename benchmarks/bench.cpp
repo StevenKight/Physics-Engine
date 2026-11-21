@@ -25,6 +25,7 @@
 #include "sim.h"
 
 #include <omp.h>
+#include <unistd.h>
 
 #include <algorithm>
 #include <chrono>
@@ -45,6 +46,8 @@ static const double TIME_LIMIT_MS = 30000.0;
 // newtonian_gravity() holds about 12 N×N double matrices at its peak.
 static double gravity_bytes(int n) { return 12.0 * n * n * sizeof(double); }
 
+// Reads MemAvailable from /proc/meminfo. Falls back to the total physical
+// memory where that file can't be read.
 static double available_bytes() {
     std::ifstream meminfo("/proc/meminfo");
     std::string key;
@@ -54,7 +57,7 @@ static double available_bytes() {
             return kb * 1024.0;
         meminfo.ignore(256, '\n');
     }
-    return 0.0;
+    return (double)sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
 }
 
 static void set_box(PhysicsObject *o, double hx, double hy, double hz) {
@@ -128,7 +131,10 @@ static Timing time_runs(const std::function<void()> &reset,
     }
 
     std::sort(ms.begin(), ms.end());
-    return {(ms[RUNS / 2 - 1] + ms[RUNS / 2]) / 2.0, ms.front(), ms.back()};
+    double median = ms[RUNS / 2];
+    if (RUNS % 2 == 0)
+        median = (ms[RUNS / 2 - 1] + ms[RUNS / 2]) / 2.0;
+    return {median, ms.front(), ms.back()};
 }
 
 static FILE *csv;
@@ -215,8 +221,11 @@ int main(int argc, char **argv) {
     // The full tick depends on the gravity router, so only that build runs
     // it, single threaded and with every core.
     if (std::string(BENCH_BACKEND) == "router") {
-        int cores = omp_get_num_procs();
-        for (int threads : {1, cores}) {
+        std::vector<int> thread_counts = {1};
+        if (omp_get_num_procs() > 1)
+            thread_counts.push_back(omp_get_num_procs());
+
+        for (int threads : thread_counts) {
             sweep(
                 "sim_sparse", threads, SIM_TICKS,
                 [](int n) { return make_boxes(n, 3.0); }, sim_ticks, sim_setup);
