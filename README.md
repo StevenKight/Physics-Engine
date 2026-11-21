@@ -66,7 +66,7 @@ Each backend is forced explicitly and timed over 10 runs after a warm-up ([bench
 - CUDA first beats Fortran at **N = 256** and keeps winning at every larger N measured. The crossover is between 128 and 256 bodies (about 253 by log-log interpolation); at 256 the two are within each other's run-to-run spread.
 - The current 64-body threshold is **too low**. At N = 128 the router picks CUDA and takes 5.0 ms where Fortran takes 2.5 ms.
 - The best speedup is **1.65x at N = 1024** (RTX 3070 vs one Ryzen 7 5800X core; driver 580.196.07, CUDA 12.1, GCC 14.2, Linux 6.11).
-- The speedup stays small because the CUDA path copies every intermediate matrix to and from the GPU. Profiling one call at N = 4096 shows about 2.1 s in `cudaMemcpy` against 0.09 s in kernels ([benchmarks/profile/](benchmarks/profile/)).
+- The speedup stays small because the CUDA path copies every intermediate matrix to and from the GPU. Profiling one call at N = 4096 shows about 2.1 s in `cudaMemcpy` against 0.09 s in kernels, and the kernels themselves are limited by FP64 throughput ([benchmarks/PROFILE.md](benchmarks/PROFILE.md)).
 - Gravity uses about 12 N x N matrices at its peak, so runs stop at N = 8192; 16384 would need about 26 GB.
 
 More plots: [gravity scaling](benchmarks/plots/gravity_scaling.png), [full simulation tick, 1 vs 16 threads](benchmarks/plots/sim_scaling.png). Raw data: [benchmarks/results/](benchmarks/results/).
@@ -77,7 +77,7 @@ More plots: [gravity scaling](benchmarks/plots/gravity_scaling.png), [full simul
 ./benchmarks/run.sh                 # builds in Release, records the environment, writes a new CSV (~40 min)
 python3 benchmarks/crossover.py     # crossover table from the newest CSV
 python3 benchmarks/plot.py          # plots from the newest CSV
-./benchmarks/profile.sh             # Nsight Systems summary of one gravity call
+./benchmarks/profile.sh             # Nsight Systems and Compute profile of one gravity call
 OMP_NUM_THREADS=1 ./build/validation/validate > validation/RESULTS.md
 ```
 
