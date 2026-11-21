@@ -10,24 +10,28 @@
 # Nsight Compute needs access to the GPU performance counters, which the
 # driver only gives to root by default. To include it, pass a sudo'd ncu:
 #   NCU="sudo /usr/local/cuda/bin/ncu" ./benchmarks/profile.sh
+#
+# NSYS can be set the same way to use a different nsys.
 
 set -e
 cd "$(dirname "$0")/.."
 
 n=${1:-4096}
+NSYS=${NSYS:-nsys}
 NCU=${NCU:-/usr/local/cuda/bin/ncu}
 bin=build/bench/benchmarks/profile_gravity
 out=benchmarks/profile
 tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
 
 cmake -B build/bench -DCMAKE_BUILD_TYPE=Release > /dev/null
 cmake --build build/bench --target profile_gravity -j"$(nproc)"
 mkdir -p "$out"
 
-nsys profile --capture-range=cudaProfilerApi --capture-range-end=stop \
+$NSYS profile --capture-range=cudaProfilerApi --capture-range-end=stop \
     -o "$tmp/gravity" "$bin" "$n"
 for report in cuda_gpu_kern_sum cuda_gpu_mem_time_sum cuda_api_sum; do
-    nsys stats -q --force-export true --format csv --report "$report" \
+    $NSYS stats -q --force-export true --format csv --report "$report" \
         "$tmp/gravity.nsys-rep" |
         grep -v '^$' > "$out/nsys_${report}_n$n.csv"
 done
@@ -44,5 +48,4 @@ else
     grep -h "==ERROR==" "$tmp/ncu.csv" "$tmp/ncu.log" || cat "$tmp/ncu.log"
 fi
 
-rm -rf "$tmp"
 echo "Wrote $out/"
