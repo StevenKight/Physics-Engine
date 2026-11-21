@@ -7,10 +7,22 @@ Usage: python3 benchmarks/crossover.py
 
 import csv
 import math
+import re
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CURRENT_THRESHOLD = 64  # GRAVITY_GPU_THRESHOLD in src/logic/forces/gravity.c
+
+
+def read_threshold():
+    """Reads the default GRAVITY_GPU_THRESHOLD from gravity.c."""
+    source = (HERE.parent / "src/logic/forces/gravity.c").read_text()
+    match = re.search(r"#define\s+GRAVITY_GPU_THRESHOLD\s+\(?(\d+)", source)
+    if not match:
+        raise SystemExit("Could not find GRAVITY_GPU_THRESHOLD in gravity.c")
+    return int(match.group(1))
+
+
+CURRENT_THRESHOLD = read_threshold()
 
 
 def latest_csv():
@@ -62,7 +74,7 @@ def find_crossover(fortran, cuda):
 
 def verdict(before, after):
     # The router sends N > CURRENT_THRESHOLD to CUDA.
-    if before is not None and before >= CURRENT_THRESHOLD * 2:
+    if before is not None and before > CURRENT_THRESHOLD:
         return "too low: CUDA is still slower than Fortran just above it"
     if after <= CURRENT_THRESHOLD:
         return "too high: CUDA already wins at or below it"
@@ -123,12 +135,11 @@ def main():
             f"- The current threshold of {CURRENT_THRESHOLD} is "
             f"{verdict(before, after)}.",
         ]
-
-    best = max(
-        (fortran[n]["median_ms"] / cuda[n]["median_ms"], n)
-        for n in set(fortran) & set(cuda)
-    )
-    lines.append(f"- Best measured speedup: {best[0]:.2f}x at N = {best[1]}.")
+        best = max(
+            (fortran[n]["median_ms"] / cuda[n]["median_ms"], n)
+            for n in set(fortran) & set(cuda)
+        )
+        lines.append(f"- Best measured speedup: {best[0]:.2f}x at N = {best[1]}.")
 
     out = HERE / "CROSSOVER.md"
     out.write_text("\n".join(lines) + "\n")
