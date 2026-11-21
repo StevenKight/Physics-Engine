@@ -15,13 +15,15 @@ add_executable(bench_cuda bench.cpp ${GRAVITY_SOURCE})
 target_compile_definitions(bench_cuda PRIVATE BENCH_BACKEND="cuda"
     USE_CUDA GRAVITY_GPU_THRESHOLD=0)
 
+# cudart is linked directly so bench.cpp can check for CUDA errors.
+find_package(CUDAToolkit REQUIRED)
 foreach(target bench_router bench_fortran bench_cuda)
     target_include_directories(${target} PRIVATE ${CMAKE_SOURCE_DIR}/src/logic)
-    target_link_libraries(${target} PRIVATE logic_lib OpenMP::OpenMP_CXX)
+    target_link_libraries(${target} PRIVATE logic_lib OpenMP::OpenMP_CXX
+        CUDA::cudart)
 endforeach()
 
 # One CUDA gravity call inside a profiler capture range, for profile.sh.
-find_package(CUDAToolkit REQUIRED)
 add_executable(profile_gravity profile_gravity.cpp ${GRAVITY_SOURCE})
 target_compile_definitions(profile_gravity PRIVATE USE_CUDA
     GRAVITY_GPU_THRESHOLD=0)

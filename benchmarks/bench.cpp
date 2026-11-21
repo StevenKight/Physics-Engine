@@ -24,6 +24,7 @@
 #include "forces/gravity.h"
 #include "sim.h"
 
+#include <cuda_runtime.h>
 #include <omp.h>
 #include <unistd.h>
 
@@ -179,6 +180,20 @@ static void sweep(const char *scenario, int threads, int ticks,
                     .median;
         t = {(t.median - overhead) / ticks, (t.min - overhead) / ticks,
              (t.max - overhead) / ticks};
+
+        // The CUDA matrix wrappers don't check for errors, so a failed
+        // cudaMalloc (out of GPU memory) would look like a very fast run.
+        // bench_fortran never uses the GPU, so it skips the check.
+        cudaError_t err = cudaSuccess;
+        if (std::string(BENCH_BACKEND) != "fortran")
+            err = cudaGetLastError();
+        if (err != cudaSuccess) {
+            fprintf(stderr, "CUDA error at n=%d: %s\n", n,
+                    cudaGetErrorString(err));
+            write_row(scenario, threads, n, ticks, {0, 0, 0},
+                      "skipped: CUDA error");
+            return;
+        }
         write_row(scenario, threads, n, ticks, t, "");
 
         if (longest_run > TIME_LIMIT_MS) {
