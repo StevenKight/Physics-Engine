@@ -26,10 +26,13 @@ const double g = 6.67430e-11;
 // the boundary on target hardware — CUDA overhead (~26 ops × H↔D transfer per
 // call) dominates for small N where each N×N matrix is tiny.
 //
+// 256 comes from benchmarks/CROSSOVER.md: on an RTX 3070 against one Ryzen 7
+// 5800X core, the two backends break even at about N = 256.
+//
 // Can be overridden at compile time (-DGRAVITY_GPU_THRESHOLD=...) to force a
 // backend, e.g. 0 for always CUDA or INT_MAX for always Fortran.
 #ifndef GRAVITY_GPU_THRESHOLD
-#define GRAVITY_GPU_THRESHOLD 64
+#define GRAVITY_GPU_THRESHOLD 256
 #endif
 
 // Returns true if the CUDA backend should be used for an N-body gravity

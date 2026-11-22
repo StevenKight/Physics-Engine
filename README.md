@@ -23,7 +23,7 @@ C/C++ ties it all together and handles the core simulation logic.
 - CMake build system configured for all three languages compiling together; `Makefile` wraps common workflows (`build`, `test`, `package`, `clean`)
 - Complete matrix operation suite (addition, subtraction, multiplication, scalar operations, element-wise division, Hadamard product, power, row/column summing) implemented in both CUDA and Fortran backends
 - `Vec3` 3D vector type and `PhysicsObject` model with Velocity Verlet integration (`object_update_position` / `object_update_velocity`)
-- Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤64 bodies, CUDA above that threshold)
+- Newtonian N-body gravity with adaptive CPU/GPU routing (Fortran for ≤256 bodies, CUDA above that threshold)
 - Two-phase collision detection: octree broad phase (AABB overlap) + SAT narrow phase (convex meshes; parallelised with OpenMP)
 - Inelastic collision response with configurable coefficient of restitution applied along the collision normal
 - Top-level `sim_run` simulation loop running collision detection and response, then a Velocity Verlet step with gravity evaluated at the updated positions, each tick
@@ -64,7 +64,7 @@ Halving the time step cuts the orbit error by 3.98x, 4.00x and 4.00x, so the int
 Each backend is forced explicitly and timed over 10 runs after a warm-up ([benchmarks/CROSSOVER.md](benchmarks/CROSSOVER.md)):
 
 - CUDA first beats Fortran at **N = 256** and keeps winning at every larger N measured. The crossover is between 128 and 256 bodies (about 251 by log-log interpolation). At 256 the two are within each other's run-to-run spread (CUDA 10.1 ms, Fortran 10.3 ms), and an earlier run had CUDA slightly slower there, so treat 256 as the break-even point rather than a clear win.
-- The current 64-body threshold is **too low**. At N = 128 the router picks CUDA and takes 4.9 ms where Fortran takes 2.6 ms.
+- The old 64-body threshold was **too low**: at N = 128 the router picked CUDA and took 4.9 ms where Fortran takes 2.6 ms. The threshold is now 256, so the router uses Fortran up to the break-even point.
 - The best speedup is **1.59x at N = 1024** (RTX 3070 vs one Ryzen 7 5800X core; driver 580.196.07, CUDA 12.1, GCC 14.2, Linux 6.11).
 - The speedup stays small because the CUDA path copies every intermediate matrix to and from the GPU. Profiling one call at N = 4096 shows about 2.1 s in `cudaMemcpy` against 0.09 s in kernels, and the kernels themselves are limited by FP64 throughput ([benchmarks/PROFILE.md](benchmarks/PROFILE.md)).
 - Gravity uses about 12 N x N matrices at its peak, so runs stop at N = 8192; 16384 would need about 26 GB.

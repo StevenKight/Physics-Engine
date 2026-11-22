@@ -172,7 +172,7 @@ A core design principle of the engine is adaptive backend selection. Each subsys
 
 The `math/` layer exposes this through a `use_gpu` flag on every operation. Higher-level subsystems evaluate their own threshold conditions and pass the appropriate flag down. For example, the gravity subsystem currently routes:
 
-- **≤ 64 bodies** → Fortran (CPU): problem is small enough that Fortran's tight-loop optimisations outperform the cost of GPU dispatch and memory transfers.
-- **> 64 bodies** → CUDA (GPU): parallelism benefits exceed dispatch overhead at this scale.
+- **≤ 256 bodies** → Fortran (CPU): problem is small enough that Fortran's tight-loop optimisations outperform the cost of GPU dispatch and memory transfers.
+- **> 256 bodies** → CUDA (GPU): parallelism benefits exceed dispatch overhead at this scale.
 
 As additional subsystems are implemented (collision detection, constraint solving, etc.), they will follow the same pattern with thresholds tuned for their specific computational characteristics.
